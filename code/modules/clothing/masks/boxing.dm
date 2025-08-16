@@ -2,63 +2,71 @@
 	name = "balaclava"
 	desc = "LOADSAMONEY"
 	icon_state = "balaclava"
-	inhand_icon_state = "balaclava"
-	flags_inv = HIDEFACE|HIDEHAIR|HIDEFACIALHAIR|HIDESNOUT
-	visor_flags_inv = HIDEFACE|HIDEFACIALHAIR|HIDESNOUT
-	alternate_worn_layer = LOW_FACEMASK_LAYER //This lets it layer below glasses and headsets; yes, that's below hair, but it already has HIDEHAIR
+	item_state = "balaclava"
 	w_class = WEIGHT_CLASS_SMALL
+	can_toggle = TRUE
 	actions_types = list(/datum/action/item_action/adjust)
+	flags_inv = HIDENAME|HIDEFACIALHAIR|HIDEHEADHAIR
+	adjusted_slot_flags = ITEM_SLOT_HEAD
+	adjusted_flags_inv = HIDENAME|HIDEFACIALHAIR
+
+	sprite_sheets = list(
+		SPECIES_VOX = 'icons/mob/clothing/species/vox/mask.dmi',
+		SPECIES_UNATHI = 'icons/mob/clothing/species/unathi/mask.dmi',
+		SPECIES_ASHWALKER_BASIC = 'icons/mob/clothing/species/unathi/mask.dmi',
+		SPECIES_ASHWALKER_SHAMAN = 'icons/mob/clothing/species/unathi/mask.dmi',
+		SPECIES_DRACONOID = 'icons/mob/clothing/species/unathi/mask.dmi',
+		SPECIES_TAJARAN = 'icons/mob/clothing/species/tajaran/mask.dmi',
+		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/mask.dmi',
+		SPECIES_GREY = 'icons/mob/clothing/species/grey/mask.dmi',
+		SPECIES_DRASK = 'icons/mob/clothing/species/drask/mask.dmi',
+		SPECIES_MONKEY = 'icons/mob/clothing/species/monkey/mask.dmi',
+		SPECIES_FARWA = 'icons/mob/clothing/species/monkey/mask.dmi',
+		SPECIES_WOLPIN = 'icons/mob/clothing/species/monkey/mask.dmi',
+		SPECIES_NEARA = 'icons/mob/clothing/species/monkey/mask.dmi',
+		SPECIES_STOK = 'icons/mob/clothing/species/monkey/mask.dmi',
+		SPECIES_WRYN = 'icons/mob/clothing/species/wryn/mask.dmi'
+		)
+
 
 /obj/item/clothing/mask/balaclava/attack_self(mob/user)
-	adjust_visor(user)
+	adjustmask(user)
 
-/obj/item/clothing/mask/floortilebalaclava
-	name = "floortile balaclava"
-	desc = "The newest floortile camouflage balaclava used for hallway warfare. \
-		The best breathability, flexibility and comfort. Designed by Camo-J's."
-	icon_state = "floortile_balaclava"
-	inhand_icon_state = "balaclava"
-	flags_inv = HIDEFACE|HIDEHAIR|HIDEFACIALHAIR|HIDESNOUT
-	visor_flags_inv = HIDEFACE|HIDEFACIALHAIR|HIDESNOUT
-	alternate_worn_layer = LOW_FACEMASK_LAYER
-	w_class = WEIGHT_CLASS_SMALL
-	actions_types = list(/datum/action/item_action/adjust)
-
-/obj/item/clothing/mask/floortilebalaclava/Initialize(mapload)
-	. = ..()
-	AddComponent(/datum/component/adjust_fishing_difficulty, -3) //tacticool
-
-/obj/item/clothing/mask/floortilebalaclava/attack_self(mob/user)
-	adjust_visor(user)
 
 /obj/item/clothing/mask/luchador
 	name = "Luchador Mask"
 	desc = "Worn by robust fighters, flying high to defeat their foes!"
 	icon_state = "luchag"
-	inhand_icon_state = null
-	flags_inv = HIDEFACE|HIDEHAIR|HIDEFACIALHAIR|HIDESNOUT
+	item_state = "luchag"
+	flags_inv = HIDENAME|HIDEHAIR
 	w_class = WEIGHT_CLASS_SMALL
 
-/obj/item/clothing/mask/luchador/Initialize(mapload)
-	. = ..()
-	AddComponent(/datum/component/speechmod, replacements = strings("luchador_replacement.json", "luchador"), end_string = " OLE!", end_string_chance = 25, uppercase = TRUE, slots = ITEM_SLOT_MASK)
+	sprite_sheets = list(
+		SPECIES_VOX = 'icons/mob/clothing/species/vox/mask.dmi',
+		SPECIES_UNATHI = 'icons/mob/clothing/species/unathi/mask.dmi',
+		SPECIES_ASHWALKER_BASIC = 'icons/mob/clothing/species/unathi/mask.dmi',
+		SPECIES_ASHWALKER_SHAMAN = 'icons/mob/clothing/species/unathi/mask.dmi',
+		SPECIES_DRACONOID = 'icons/mob/clothing/species/unathi/mask.dmi',
+		SPECIES_TAJARAN = 'icons/mob/clothing/species/tajaran/mask.dmi',
+		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/mask.dmi',
+		SPECIES_GREY = 'icons/mob/clothing/species/grey/mask.dmi',
+		SPECIES_DRASK = 'icons/mob/clothing/species/drask/mask.dmi',
+		SPECIES_MONKEY = 'icons/mob/clothing/species/monkey/mask.dmi',
+		SPECIES_FARWA = 'icons/mob/clothing/species/monkey/mask.dmi',
+		SPECIES_WOLPIN = 'icons/mob/clothing/species/monkey/mask.dmi',
+		SPECIES_NEARA = 'icons/mob/clothing/species/monkey/mask.dmi',
+		SPECIES_STOK = 'icons/mob/clothing/species/monkey/mask.dmi',
+		SPECIES_WRYN = 'icons/mob/clothing/species/wryn/mask.dmi'
+		)
 
 /obj/item/clothing/mask/luchador/tecnicos
 	name = "Tecnicos Mask"
 	desc = "Worn by robust fighters who uphold justice and fight honorably."
 	icon_state = "luchador"
+	item_state = "luchador"
 
 /obj/item/clothing/mask/luchador/rudos
 	name = "Rudos Mask"
 	desc = "Worn by robust fighters who are willing to do anything to win."
 	icon_state = "luchar"
-
-/obj/item/clothing/mask/russian_balaclava
-	name = "russian balaclava"
-	desc = "Protects your face from snow."
-	icon_state = "rus_balaclava"
-	inhand_icon_state = "balaclava"
-	flags_inv = HIDEFACE|HIDEHAIR|HIDEFACIALHAIR|HIDESNOUT
-	visor_flags_inv = HIDEFACE|HIDEFACIALHAIR|HIDESNOUT
-	alternate_worn_layer = LOW_FACEMASK_LAYER //This lets it layer below glasses and headsets; yes, that's below hair, but it already has HIDEHAIR
-	w_class = WEIGHT_CLASS_SMALL
+	item_state = "luchar"

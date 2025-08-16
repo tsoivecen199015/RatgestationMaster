@@ -1,173 +1,156 @@
-/obj/item/clothing/suit/toggle/labcoat
+/obj/item/clothing/suit/storage/labcoat
 	name = "labcoat"
-	desc = "A suit that protects against minor chemical spills."
-	icon_state = "labcoat"
-	icon = 'icons/obj/clothing/suits/labcoat.dmi'
-	worn_icon = 'icons/mob/clothing/suits/labcoat.dmi'
-	inhand_icon_state = "labcoat"
+	desc = "Стерильный белый халат. Защищает тело и одежду от попадания на неё опасных реагентов."
+	ru_names = list(
+		NOMINATIVE = "лабораторный халат",
+		GENITIVE = "лабораторного халата",
+		DATIVE = "лабораторному халату",
+		ACCUSATIVE = "лабораторный халат",
+		INSTRUMENTAL = "лабораторным халатом",
+		PREPOSITIONAL = "лабораторном халате"
+	)
+	icon_state = "labcoat_open"
+	item_state = "labcoat_open"
+	ignore_suitadjust = FALSE
+	permeability_coefficient = 0.5
 	blood_overlay_type = "coat"
-	body_parts_covered = CHEST|ARMS
-	allowed = list(
-		/obj/item/analyzer,
-		/obj/item/biopsy_tool,
-		/obj/item/dnainjector,
-		/obj/item/flashlight/pen,
-		/obj/item/healthanalyzer,
-		/obj/item/paper,
-		/obj/item/reagent_containers/dropper,
-		/obj/item/reagent_containers/cup/beaker,
-		/obj/item/reagent_containers/cup/bottle,
-		/obj/item/reagent_containers/cup/tube,
-		/obj/item/reagent_containers/hypospray,
-		/obj/item/reagent_containers/pill,
-		/obj/item/reagent_containers/syringe,
-		/obj/item/gun/syringe,
-		/obj/item/sensor_device,
-		/obj/item/soap,
-		/obj/item/stack/medical,
-		/obj/item/storage/pill_bottle,
-		/obj/item/tank/internals/emergency_oxygen,
-		/obj/item/tank/internals/plasmaman,
+	body_parts_covered = UPPER_TORSO|LOWER_TORSO|ARMS
+	allowed = list(/obj/item/analyzer,/obj/item/stack/medical,/obj/item/dnainjector,/obj/item/reagent_containers/dropper,/obj/item/reagent_containers/syringe,/obj/item/reagent_containers/hypospray,/obj/item/reagent_containers/applicator,/obj/item/healthanalyzer,/obj/item/flashlight/pen,/obj/item/reagent_containers/glass/bottle,/obj/item/reagent_containers/glass/beaker,/obj/item/reagent_containers/food/pill,/obj/item/storage/pill_bottle,/obj/item/paper,/obj/item/rad_laser)
+	armor = list(MELEE = 0, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 50, RAD = 0, FIRE = 50, ACID = 50)
+	sprite_sheets = list(
+		SPECIES_PLASMAMAN = 'icons/mob/clothing/species/plasmaman/suit.dmi',
+		SPECIES_VOX = 'icons/mob/clothing/species/vox/suit.dmi',
+		SPECIES_GREY = 'icons/mob/clothing/species/grey/suit.dmi',
+		SPECIES_MONKEY = 'icons/mob/clothing/species/monkey/suit.dmi',
+		SPECIES_FARWA = 'icons/mob/clothing/species/monkey/suit.dmi',
+		SPECIES_WOLPIN = 'icons/mob/clothing/species/monkey/suit.dmi',
+		SPECIES_NEARA = 'icons/mob/clothing/species/monkey/suit.dmi',
+		SPECIES_STOK = 'icons/mob/clothing/species/monkey/suit.dmi'
 		)
-	armor_type = /datum/armor/toggle_labcoat
-	species_exception = list(/datum/species/golem)
+	actions_types = list(/datum/action/item_action/button)
+	adjust_flavour = "unbutton"
 
-/obj/item/clothing/suit/toggle/labcoat/cmo
+/obj/item/clothing/suit/storage/labcoat/cmo
 	name = "chief medical officer's labcoat"
-	desc = "Bluer than the standard model."
-	icon_state = "labcoat_cmo"
-	inhand_icon_state = null
-
-/obj/item/clothing/suit/toggle/labcoat/cmo/Initialize(mapload)
-	. = ..()
-	AddComponent(/datum/component/adjust_fishing_difficulty, -2) //FISH DOCTOR?!
-
-/datum/armor/toggle_labcoat
-	bio = 50
-	fire = 50
-	acid = 50
-
-/obj/item/clothing/suit/toggle/labcoat/cmo/Initialize(mapload)
-	. = ..()
-	allowed += list(
-		/obj/item/melee/baton/telescopic,
+	desc = "Стерильный лабораторный халат. Окрашен в синие цвета."
+	ru_names = list(
+		NOMINATIVE = "лабораторный халат главного врача",
+		GENITIVE = "лабораторного халата главного врача",
+		DATIVE = "лабораторному халату главного врача",
+		ACCUSATIVE = "лабораторный халат главного врача",
+		INSTRUMENTAL = "лабораторным халатом главного врача",
+		PREPOSITIONAL = "лабораторном халате главного врача"
 	)
+	icon_state = "labcoat_cmo_open"
+	item_state = "labcoat_cmo_open"
 
-/obj/item/clothing/suit/toggle/labcoat/paramedic
-	name = "paramedic's jacket"
-	desc = "A dark blue jacket for paramedics with reflective stripes."
-	icon_state = "labcoat_paramedic"
-	inhand_icon_state = null
+/obj/item/clothing/suit/storage/labcoat/mad
+	name = "mad scientist's labcoat"
+	desc = "Ношение этого халата побуждает в вас желание врезать кому-нибудь по башке и выбросить его тело в космос."
+	ru_names = list(
+		NOMINATIVE = "лабораторный халат безумного учёного",
+		GENITIVE = "лабораторного халата безумного учёного",
+		DATIVE = "лабораторному халату безумного учёного",
+		ACCUSATIVE = "лабораторный халат безумного учёного",
+		INSTRUMENTAL = "лабораторным халатом безумного учёного",
+		PREPOSITIONAL = "лабораторном халате безумного учёного"
+	)
+	icon_state = "labcoat_green_open"
+	item_state = "labcoat_green_open"
 
-/obj/item/clothing/suit/toggle/labcoat/paramedic/Initialize(mapload)
-	. = ..()
-	AddComponent(/datum/component/adjust_fishing_difficulty, -2) //FISH DOCTOR?!
-
-/obj/item/clothing/suit/toggle/labcoat/mad
-	name = "\proper The Mad's labcoat"
-	desc = "It makes you look capable of konking someone on the noggin and shooting them into space."
-	icon_state = "labgreen"
-	inhand_icon_state = null
-
-/obj/item/clothing/suit/toggle/labcoat/genetics
+/obj/item/clothing/suit/storage/labcoat/genetics
 	name = "geneticist labcoat"
-	desc = "A suit that protects against minor chemical spills. Has a blue stripe on the shoulder."
-	icon_state = "labcoat_job"
-	greyscale_config = /datum/greyscale_config/labcoat
-	greyscale_config_worn = /datum/greyscale_config/labcoat/worn
-	greyscale_colors = "#EEEEEE#4A77A1#4A77A1#7095C2"
+	desc = "Стерильный белый халат с голубыми нашивками на плечах. Защищает тело и одежду от попадания на неё опасных реагентов."
+	ru_names = list(
+		NOMINATIVE = "лабораторный халат генетика",
+		GENITIVE = "лабораторного халата генетика",
+		DATIVE = "лабораторному халату генетика",
+		ACCUSATIVE = "лабораторный халат генетика",
+		INSTRUMENTAL = "лабораторным халатом генетика",
+		PREPOSITIONAL = "лабораторном халате генетика"
+	)
+	icon_state = "labcoat_gen_open"
+	item_state = "labcoat_gen_open"
 
-/obj/item/clothing/suit/toggle/labcoat/genetics/Initialize(mapload)
-	. = ..()
-	allowed += /obj/item/sequence_scanner
-
-/obj/item/clothing/suit/toggle/labcoat/chemist
+/obj/item/clothing/suit/storage/labcoat/chemist
 	name = "chemist labcoat"
-	desc = "A suit that protects against minor chemical spills. Has an orange stripe on the shoulder."
-	icon_state = "labcoat_job"
-	greyscale_config = /datum/greyscale_config/labcoat
-	greyscale_config_worn = /datum/greyscale_config/labcoat/worn
-	greyscale_colors = "#EEEEEE#F17420#F17420#EB6F2C"
+	desc = "Стерильный белый халат с оранжевыми нашивками на плечах. Защищает тело и одежду от попадания на неё опасных реагентов."
+	ru_names = list(
+		NOMINATIVE = "лабораторный халат химика",
+		GENITIVE = "лабораторного халата химика",
+		DATIVE = "лабораторному халату химика",
+		ACCUSATIVE = "лабораторный халат химика",
+		INSTRUMENTAL = "лабораторным халатом химика",
+		PREPOSITIONAL = "лабораторном халате химика"
+	)
+	icon_state = "labcoat_chem_open"
+	item_state = "labcoat_chem_open"
 
-/obj/item/clothing/suit/toggle/labcoat/chemist/Initialize(mapload)
-	. = ..()
-	allowed += /obj/item/storage/bag/chemistry
-
-/obj/item/clothing/suit/toggle/labcoat/virologist
+/obj/item/clothing/suit/storage/labcoat/virologist
 	name = "virologist labcoat"
-	desc = "A suit that protects against minor chemical spills. Has a green stripe on the shoulder."
-	icon_state = "labcoat_job"
-	greyscale_config = /datum/greyscale_config/labcoat
-	greyscale_config_worn = /datum/greyscale_config/labcoat/worn
-	greyscale_colors = "#EEEEEE#198019#198019#40992E"
-
-/obj/item/clothing/suit/toggle/labcoat/virologist/Initialize(mapload)
-	. = ..()
-	allowed += /obj/item/storage/bag/bio
-
-/obj/item/clothing/suit/toggle/labcoat/coroner
-	name = "coroner labcoat"
-	desc = "A suit that protects against minor chemical spills. Has a black stripe on the shoulder."
-	icon_state = "labcoat_job"
-	greyscale_config = /datum/greyscale_config/labcoat
-	greyscale_config_worn = /datum/greyscale_config/labcoat/worn
-	greyscale_colors = "#EEEEEE#2D2D33#2D2D33#39393F"
-
-/obj/item/clothing/suit/toggle/labcoat/coroner/Initialize(mapload)
-	. = ..()
-	allowed += list(
-		/obj/item/autopsy_scanner,
-		/obj/item/scythe,
-		/obj/item/shovel,
-		/obj/item/shovel/serrated,
-		/obj/item/trench_tool,
+	desc = "Стерильный белый халат с зелёными нашивками на плечах. Защищает тело и одежду от попадания на неё опасных реагентов."
+	ru_names = list(
+		NOMINATIVE = "лабораторный халат вирусолога",
+		GENITIVE = "лабораторного халата вирусолога",
+		DATIVE = "лабораторному халату вирусолога",
+		ACCUSATIVE = "лабораторный халат вирусолога",
+		INSTRUMENTAL = "лабораторным халатом вирусолога",
+		PREPOSITIONAL = "лабораторном халате вирусолога"
 	)
+	icon_state = "labcoat_vir_open"
 
-/obj/item/clothing/suit/toggle/labcoat/science
+/obj/item/clothing/suit/storage/labcoat/science
 	name = "scientist labcoat"
-	desc = "A suit that protects against minor chemical spills. Has a purple stripe on the shoulder."
-	icon_state = "labcoat_job"
-	greyscale_config = /datum/greyscale_config/labcoat
-	greyscale_config_worn = /datum/greyscale_config/labcoat/worn
-	greyscale_colors = "#EEEEEE#7E1980#7E1980#B347A1"
-
-/obj/item/clothing/suit/toggle/labcoat/science/Initialize(mapload)
-	. = ..()
-	allowed += /obj/item/storage/bag/xeno
-
-/obj/item/clothing/suit/toggle/labcoat/roboticist
-	name = "roboticist labcoat"
-	desc = "More like an eccentric coat than a labcoat. Helps pass off bloodstains as part of the aesthetic. Comes with red shoulder pads."
-	icon_state = "labcoat_job"
-	greyscale_config = /datum/greyscale_config/labcoat
-	greyscale_config_worn = /datum/greyscale_config/labcoat/worn
-	greyscale_colors = "#EEEEEE#88242D#88242D#39393F"
-
-/obj/item/clothing/suit/toggle/labcoat/interdyne
-	name = "interdyne labcoat"
-	desc = "More like an eccentric coat than a labcoat. Helps pass off bloodstains as part of the aesthetic. Comes with red shoulder pads."
-	icon_state = "labcoat_job"
-	greyscale_config = /datum/greyscale_config/labcoat
-	greyscale_config_worn = /datum/greyscale_config/labcoat/worn
-	greyscale_colors = "#EEEEEE#88242D#88242D#39393F"
-
-// Research Director
-
-/obj/item/clothing/suit/toggle/labcoat/research_director
-	name = "research director's coat"
-	desc = "A mix between a labcoat and just a regular coat. It's made out of a special anti-bacterial, anti-acidic, and anti-biohazardous synthetic fabric."
-	icon_state = "labcoat_rd"
-	armor_type = /datum/armor/jacket_research_director
-	body_parts_covered = CHEST|GROIN|ARMS
-
-/datum/armor/jacket_research_director
-	bio = 75
-	fire = 75
-	acid = 75
-
-/obj/item/clothing/suit/toggle/labcoat/research_director/Initialize(mapload)
-	. = ..()
-	allowed += list(
-		/obj/item/storage/bag/xeno,
-		/obj/item/melee/baton/telescopic,
+	desc = "Стерильный белый халат с фиолетовыми нашивками на плечах. Защищает тело и одежду от попадания на неё опасных реагентов."
+	ru_names = list(
+		NOMINATIVE = "лабораторный халат учёного",
+		GENITIVE = "лабораторного халата учёного",
+		DATIVE = "лабораторному халату учёного",
+		ACCUSATIVE = "лабораторный халат учёного",
+		INSTRUMENTAL = "лабораторным халатом учёного",
+		PREPOSITIONAL = "лабораторном халате учёного"
 	)
+	icon_state = "labcoat_tox_open"
+	item_state = "labcoat_tox_open"
+
+/obj/item/clothing/suit/storage/labcoat/mortician
+	name = "coroner labcoat"
+	desc = "Стерильный белый халат с чёрными нашивками на плечах. Защищает тело и одежду от попадания на неё опасных реагентов."
+	ru_names = list(
+		NOMINATIVE = "лабораторный халат патологоанатома",
+		GENITIVE = "лабораторного халата патологоанатома",
+		DATIVE = "лабораторному халату патологоанатома",
+		ACCUSATIVE = "лабораторный халат патологоанатома",
+		INSTRUMENTAL = "лабораторным халатом патологоанатома",
+		PREPOSITIONAL = "лабораторном халате патологоанатома"
+	)
+	icon_state = "labcoat_mort_open"
+	item_state = "labcoat_mort_open"
+
+/obj/item/clothing/suit/storage/labcoat/emt
+	name = "EMT labcoat"
+	desc = "Удобный халат, окрашенный в тёмные цвета. Создан специально для парамедиков."
+	ru_names = list(
+		NOMINATIVE = "лабораторный халат парамедика",
+		GENITIVE = "лабораторного халата парамедика",
+		DATIVE = "лабораторному халату парамедика",
+		ACCUSATIVE = "лабораторный халат парамедика",
+		INSTRUMENTAL = "лабораторным халатом парамедика",
+		PREPOSITIONAL = "лабораторном халате парамедика"
+	)
+	icon_state = "labcoat_emt_open"
+	item_state = "labcoat_emt_open"
+
+/obj/item/clothing/suit/storage/labcoat/mining_medic
+	name = "mining medic's labcoat"
+	desc = "Стерильный белый халат с коричневыми нашивками на плечах. От него исходит тонкий запах пепла."
+	ru_names = list(
+		NOMINATIVE = "лабораторный халат шахтёрского врача",
+		GENITIVE = "лабораторного халата шахтёрского врача",
+		DATIVE = "лабораторному халату шахтёрского врача",
+		ACCUSATIVE = "лабораторный халат шахтёрского врача",
+		INSTRUMENTAL = "лабораторным халатом шахтёрского врача",
+		PREPOSITIONAL = "лабораторном халате шахтёрского врача"
+	)
+	icon_state = "mining_labcoat_open"
+	item_state = "mining_labcoat_open"

@@ -1,534 +1,918 @@
-/// Map of names of clown mask types to clown mask icon states
-GLOBAL_LIST_INIT(clown_mask_options, list(
-	"True Form" = "clown",
-	"The Coquette" = "sexyclown",
-	"The Madman" = "joker",
-	"The Rainbow Color" = "rainbow",
-	"The Jester" = "chaos",
-))
-
 /obj/item/clothing/mask/gas
 	name = "gas mask"
-	desc = "A face-covering mask that can be connected to an air supply. Good for concealing your identity and with a filter slot to help remove those toxins." //More accurate
+	desc = "Полностью закрывающая лицо маска, которую можно подключить к системе подачи воздуха."
+	ru_names = list(
+		NOMINATIVE = "противогаз",
+		GENITIVE = "противогаза",
+		DATIVE = "противогазу",
+		ACCUSATIVE = "противогаз",
+		INSTRUMENTAL = "противогазом",
+		PREPOSITIONAL = "противогазе"
+	)
+	gender = MALE
 	icon_state = "gas_alt"
-	clothing_flags = BLOCK_GAS_SMOKE_EFFECT | MASKINTERNALS | GAS_FILTERING
-	flags_inv = HIDEEARS|HIDEEYES|HIDEFACE|HIDEFACIALHAIR|HIDESNOUT
+	clothing_flags = BLOCK_GAS_SMOKE_EFFECT|AIRTIGHT
+	flags_inv = HIDEGLASSES|HIDENAME
+	flags_cover = MASKCOVERSMOUTH|MASKCOVERSEYES
 	w_class = WEIGHT_CLASS_NORMAL
-	inhand_icon_state = "gas_alt"
-	armor_type = /datum/armor/mask_gas
-	flags_cover = MASKCOVERSEYES | MASKCOVERSMOUTH | PEPPERPROOF
+	item_state = "gas_alt"
+	gas_transfer_coefficient = 0.01
+	permeability_coefficient = 0.01
 	resistance_flags = NONE
-	voice_filter = "lowpass=f=750,volume=2"
-	///Max numbers of installable filters
-	var/max_filters = 1
-	///List to keep track of each filter
-	var/list/gas_filters
-	///Type of filter that spawns on roundstart
-	var/starting_filter_type = /obj/item/gas_filter
-	///Does the mask have an FOV?
-	var/has_fov = TRUE
-	///Cigarette in the mask
-	var/obj/item/cigarette/cig
-	///How much does this mask affect fishing difficulty
-	var/fishing_modifier = 2
-
-/datum/armor/mask_gas
-	bio = 100
-
-/obj/item/clothing/mask/gas/Initialize(mapload)
-	. = ..()
-	init_fov()
-
-	if(fishing_modifier)
-		AddComponent(/datum/component/adjust_fishing_difficulty, fishing_modifier)
-
-	if(!max_filters || !starting_filter_type)
-		return
-
-	for(var/i in 1 to max_filters)
-		var/obj/item/gas_filter/inserted_filter = new starting_filter_type(src)
-		LAZYADD(gas_filters, inserted_filter)
-	has_filter = TRUE
-
-/obj/item/clothing/mask/gas/worn_overlays(mutable_appearance/standing, isinhands)
-	. = ..()
-	if(!isinhands && cig)
-		. += cig.build_worn_icon(default_layer = FACEMASK_LAYER, default_icon_file = 'icons/mob/clothing/mask.dmi')
-
-/obj/item/clothing/mask/gas/Destroy()
-	QDEL_LAZYLIST(gas_filters)
-	return..()
-
-/obj/item/clothing/mask/gas/equipped(mob/equipee, slot)
-	cig?.equipped(equipee, slot)
-	return ..()
-
-/obj/item/clothing/mask/gas/adjust_visor(mob/living/user)
-	if(!isnull(cig))
-		balloon_alert(user, "cig in the way!")
-		return FALSE
-	return ..()
-
-/obj/item/clothing/mask/gas/examine(mob/user)
-	. = ..()
-	if(cig)
-		. += span_notice("There is a [cig.name] jammed into the filter slot.")
-	if(max_filters > 0 && !cig)
-		. += span_notice("[src] has [max_filters] slot\s for filters.")
-	if(LAZYLEN(gas_filters) > 0)
-		. += span_notice("Currently there [LAZYLEN(gas_filters) == 1 ? "is" : "are"] [LAZYLEN(gas_filters)] filter\s with [get_filter_durability()]% durability.")
-		. += span_notice("The filters can be removed by right-clicking with an empty hand on [src].")
-
-/obj/item/clothing/mask/gas/Exited(atom/movable/gone)
-	. = ..()
-	if(gone == cig)
-		cig = null
-		if(ismob(loc))
-			var/mob/wearer = loc
-			wearer.update_worn_mask()
-
-/obj/item/clothing/mask/gas/attackby(obj/item/tool, mob/user)
-	var/valid_wearer = ismob(loc)
-	var/mob/wearer = loc
-	if(istype(tool, /obj/item/cigarette))
-		if(flags_cover & MASKCOVERSMOUTH)
-			balloon_alert(user, "mask's mouth is covered!")
-			return ..()
-
-		if(max_filters <= 0 || cig)
-			balloon_alert(user, "can't hold that!")
-			return ..()
-
-		if(has_filter)
-			balloon_alert(user, "filters in the mask!")
-			return ..()
-
-		cig = tool
-		if(valid_wearer)
-			cig.equipped(loc, wearer.get_slot_by_item(cig))
-
-		cig.forceMove(src)
-		if(valid_wearer)
-			wearer.update_worn_mask()
-		return TRUE
-
-	if(cig)
-		var/cig_attackby = cig.attackby(tool, user)
-		if(valid_wearer)
-			wearer.update_worn_mask()
-		return cig_attackby
-	if(!istype(tool, /obj/item/gas_filter))
-		return ..()
-	if(LAZYLEN(gas_filters) >= max_filters)
-		return ..()
-	if(!user.transferItemToLoc(tool, src))
-		return ..()
-	LAZYADD(gas_filters, tool)
-	has_filter = TRUE
-	return TRUE
-
-/obj/item/clothing/mask/gas/attack_hand_secondary(mob/user, list/modifiers)
-	if(cig)
-		user.put_in_hands(cig)
-		cig = null
-		if(ismob(loc))
-			var/mob/wearer = loc
-			wearer.update_worn_mask()
-		return SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN
-	if(!has_filter || !max_filters)
-		return SECONDARY_ATTACK_CONTINUE_CHAIN
-	for(var/i in 1 to max_filters)
-		var/obj/item/gas_filter/filter = locate() in src
-		if(!filter)
-			continue
-		user.put_in_hands(filter)
-		LAZYREMOVE(gas_filters, filter)
-	if(LAZYLEN(gas_filters) <= 0)
-		has_filter = FALSE
-	return SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN
-
-///Check _masks.dm for this one
-/obj/item/clothing/mask/gas/consume_filter(datum/gas_mixture/breath)
-	if(LAZYLEN(gas_filters) <= 0 || max_filters == 0)
-		return breath
-	var/obj/item/gas_filter/gas_filter = pick(gas_filters)
-	var/datum/gas_mixture/filtered_breath = gas_filter.reduce_filter_status(breath)
-	if(gas_filter.filter_status <= 0)
-		LAZYREMOVE(gas_filters, gas_filter)
-		qdel(gas_filter)
-	if(LAZYLEN(gas_filters) <= 0)
-		has_filter = FALSE
-	return filtered_breath
-
-/// Initializes the FoV component for the gas mask
-/obj/item/clothing/mask/gas/proc/init_fov()
-	if (has_fov)
-		AddComponent(/datum/component/clothing_fov_visor, FOV_90_DEGREES)
-
-/**
- * Getter for overall filter durability, takes into consideration all filters filter_status
- */
-/obj/item/clothing/mask/gas/proc/get_filter_durability()
-	var/max_filters_durability = LAZYLEN(gas_filters) * 100
-	var/current_filters_durability
-	for(var/obj/item/gas_filter/gas_filter as anything in gas_filters)
-		current_filters_durability += gas_filter.filter_status
-	var/durability = (current_filters_durability / max_filters_durability) * 100
-	return durability
-
-/obj/item/clothing/mask/gas/atmos
-	name = "atmospheric gas mask"
-	desc = "Improved gas mask utilized by atmospheric technicians. It's flameproof!"
-	icon_state = "gas_atmos"
-	inhand_icon_state = "gas_atmos"
-	armor_type = /datum/armor/gas_atmos
-	resistance_flags = FIRE_PROOF
-	max_filters = 3
-
-/datum/armor/gas_atmos
-	bio = 100
-	fire = 20
-	acid = 10
-
-/obj/item/clothing/mask/gas/atmos/plasmaman
-	starting_filter_type = /obj/item/gas_filter/plasmaman
-
-/obj/item/clothing/mask/gas/atmos/captain
-	name = "captain's gas mask"
-	desc = "Nanotrasen cut corners and repainted a spare atmospheric gas mask, but don't tell anyone."
-	icon_state = "gas_cap"
-	inhand_icon_state = "gasmask_captain"
-	resistance_flags = FIRE_PROOF | ACID_PROOF
-
-/obj/item/clothing/mask/gas/atmos/centcom
-	name = "\improper CentCom gas mask"
-	desc = "Oooh, gold and green. Fancy! This should help as you sit in your office."
-	icon = 'icons/obj/clothing/masks.dmi'
-	worn_icon = 'icons/mob/clothing/mask.dmi'
-	worn_icon_state = "gas_centcom"
-	icon_state = "gas_centcom"
-	inhand_icon_state = "gas_centcom"
-	resistance_flags = FIRE_PROOF | ACID_PROOF
+	undyeable = TRUE
+	sprite_sheets = list(
+		SPECIES_VOX = 'icons/mob/clothing/species/vox/mask.dmi',
+		SPECIES_UNATHI = 'icons/mob/clothing/species/unathi/mask.dmi',
+		SPECIES_ASHWALKER_BASIC = 'icons/mob/clothing/species/unathi/mask.dmi',
+		SPECIES_ASHWALKER_SHAMAN = 'icons/mob/clothing/species/unathi/mask.dmi',
+		SPECIES_DRACONOID = 'icons/mob/clothing/species/unathi/mask.dmi',
+		SPECIES_TAJARAN = 'icons/mob/clothing/species/tajaran/mask.dmi',
+		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/mask.dmi',
+		SPECIES_DRASK = 'icons/mob/clothing/species/drask/mask.dmi',
+		SPECIES_GREY = 'icons/mob/clothing/species/grey/mask.dmi',
+		SPECIES_PLASMAMAN = 'icons/mob/clothing/species/plasmaman/mask.dmi',
+		SPECIES_MONKEY = 'icons/mob/clothing/species/monkey/mask.dmi',
+		SPECIES_FARWA = 'icons/mob/clothing/species/monkey/mask.dmi',
+		SPECIES_WOLPIN = 'icons/mob/clothing/species/monkey/mask.dmi',
+		SPECIES_NEARA = 'icons/mob/clothing/species/monkey/mask.dmi',
+		SPECIES_STOK = 'icons/mob/clothing/species/monkey/mask.dmi',
+		SPECIES_WRYN = 'icons/mob/clothing/species/wryn/mask.dmi'
+	)
 
 // **** Welding gas mask ****
 
 /obj/item/clothing/mask/gas/welding
-	name = "welding mask"
-	desc = "A gas mask with built-in welding goggles and a face shield. Looks like a skull - clearly designed by a nerd."
+	name = "welding gas mask"
+	desc = "Противогаз, со встроенным лицевым щитком и сварочными очками. Был спроектирован ботанами, поэтому выглядит как череп."
+	ru_names = list(
+		NOMINATIVE = "сварочный протовогаз",
+		GENITIVE = "сварочного протовогаза",
+		DATIVE = "сварочному протовогазу",
+		ACCUSATIVE = "сварочный протовогаз",
+		INSTRUMENTAL = "сварочным протовогазом",
+		PREPOSITIONAL = "сварочном протовогазе"
+	)
 	icon_state = "weldingmask"
+	item_state = "weldingmask"
+	materials = list(MAT_METAL=4000, MAT_GLASS=2000)
 	flash_protect = FLASH_PROTECTION_WELDER
-	custom_materials = list(/datum/material/iron=SHEET_MATERIAL_AMOUNT*2, /datum/material/glass=SHEET_MATERIAL_AMOUNT)
 	tint = 2
-	armor_type = /datum/armor/gas_welding
+	can_toggle = TRUE
+	armor = list(MELEE = 10, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 100, ACID = 55)
+	origin_tech = "materials=2;engineering=3"
 	actions_types = list(/datum/action/item_action/toggle)
-	flags_inv = HIDEEARS|HIDEEYES|HIDEFACE|HIDESNOUT
-	flags_cover = MASKCOVERSEYES
-	visor_flags_inv = HIDEEYES
-	visor_flags_cover = MASKCOVERSEYES
-	visor_vars_to_toggle = VISOR_FLASHPROTECT | VISOR_TINT
+	flags_cover = MASKCOVERSEYES|MASKCOVERSMOUTH
+	visor_flags_inv = HIDEGLASSES
 	resistance_flags = FIRE_PROOF
-	clothing_flags = parent_type::clothing_flags | INTERNALS_ADJUST_EXEMPT
-	fishing_modifier = 8
 
-/datum/armor/gas_welding
-	melee = 10
-	bio = 100
-	fire = 100
-	acid = 55
 
 /obj/item/clothing/mask/gas/welding/attack_self(mob/user)
-	adjust_visor(user)
+	weldingvisortoggle(user)
 
-/obj/item/clothing/mask/gas/welding/adjust_visor(mob/living/user)
+
+/obj/item/clothing/mask/gas/welding/adjustmask(mob/living/carbon/human/user)
+	return
+
+
+/obj/item/clothing/mask/gas/explorer
+	name = "explorer gas mask"
+	desc = "Противогаз военного качества, который можно подключить к системе подачи воздуха."
+	ru_names = list(
+		NOMINATIVE = "противогаз исследователя",
+		GENITIVE = "противогаза исследователя",
+		DATIVE = "противогазу исследователя",
+		ACCUSATIVE = "противогаз исследователя",
+		INSTRUMENTAL = "противогазом исследователя",
+		PREPOSITIONAL = "противогазе исследователя"
+	)
+	icon_state = "gas_mining"
+	actions_types = list(/datum/action/item_action/adjust)
+	armor = list(MELEE = 10, BULLET = 5, LASER = 5, ENERGY = 5, BOMB = 0, BIO = 50, RAD = 0, FIRE = 20, ACID = 40)
+	resistance_flags = FIRE_PROOF
+	can_toggle = TRUE
+
+	sprite_sheets = list(
+		SPECIES_VOX = 'icons/mob/clothing/species/vox/mask.dmi',
+		SPECIES_UNATHI = 'icons/mob/clothing/species/unathi/mask.dmi',
+		SPECIES_ASHWALKER_BASIC = 'icons/mob/clothing/species/unathi/mask.dmi',
+		SPECIES_ASHWALKER_SHAMAN = 'icons/mob/clothing/species/unathi/mask.dmi',
+		SPECIES_DRACONOID = 'icons/mob/clothing/species/unathi/mask.dmi',
+		SPECIES_TAJARAN = 'icons/mob/clothing/species/tajaran/mask.dmi',
+		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/mask.dmi',
+		SPECIES_DRASK = 'icons/mob/clothing/species/drask/mask.dmi',
+		SPECIES_GREY = 'icons/mob/clothing/species/grey/mask.dmi',
+		SPECIES_MONKEY = 'icons/mob/clothing/species/monkey/mask.dmi',
+		SPECIES_FARWA = 'icons/mob/clothing/species/monkey/mask.dmi',
+		SPECIES_WOLPIN = 'icons/mob/clothing/species/monkey/mask.dmi',
+		SPECIES_NEARA = 'icons/mob/clothing/species/monkey/mask.dmi',
+		SPECIES_STOK = 'icons/mob/clothing/species/monkey/mask.dmi',
+		SPECIES_WRYN = 'icons/mob/clothing/species/wryn/mask.dmi'
+	)
+
+
+/obj/item/clothing/mask/gas/explorer/attack_self(mob/user)
+	adjustmask(user)
+
+
+/obj/item/clothing/mask/gas/explorer/adjustmask(mob/living/carbon/human/user)
 	. = ..()
 	if(.)
-		playsound(src, 'sound/vehicles/mecha/mechmove03.ogg', 50, TRUE)
-	if(!fishing_modifier)
-		return
-	if(up)
-		qdel(GetComponent(/datum/component/adjust_fishing_difficulty))
-	else
-		AddComponent(/datum/component/adjust_fishing_difficulty, fishing_modifier)
+		w_class = up ? WEIGHT_CLASS_SMALL : WEIGHT_CLASS_NORMAL
 
-/obj/item/clothing/mask/gas/welding/update_icon_state()
+
+/obj/item/clothing/mask/gas/explorer/force_adjust_mask()
 	. = ..()
-	icon_state = "[initial(icon_state)][up ? "up" : ""]"
+	w_class = WEIGHT_CLASS_SMALL
 
-/obj/item/clothing/mask/gas/welding/up/Initialize(mapload)
+
+/obj/item/clothing/mask/gas/explorer/folded/Initialize(mapload)
 	. = ..()
-	visor_toggling()
+	force_adjust_mask()
 
-// ********************************************************************
+//Bane gas mask
+/obj/item/clothing/mask/banemask
+	name = "bane mask"
+	desc = "Никому не было до меня дела, пока я не надел маску."
+	ru_names = list(
+		NOMINATIVE = "маска Бейна",
+		GENITIVE = "маски Бейна",
+		DATIVE = "маске Бейна",
+		ACCUSATIVE = "маску Бейна",
+		INSTRUMENTAL = "маской Бейна",
+		PREPOSITIONAL = "маске Бейна"
+	)
+	icon_state = "bane_mask"
+	clothing_flags = BLOCK_GAS_SMOKE_EFFECT|AIRTIGHT
+	flags_inv = HIDEHEADSETS|HIDEGLASSES|HIDENAME
+	flags_cover = MASKCOVERSMOUTH | MASKCOVERSEYES
+	w_class = WEIGHT_CLASS_NORMAL
+	item_state = "bane_mask"
+	gas_transfer_coefficient = 0.01
+	permeability_coefficient = 0.01
+
 
 //Plague Dr suit can be found in clothing/suits/bio.dm
 /obj/item/clothing/mask/gas/plaguedoctor
 	name = "plague doctor mask"
-	desc = "A modernised version of the classic design, this mask will not only protect you from exposure to the Pestilence but it can also be connected to an air supply."
+	desc = "Обновленная версия классической маски, которую можно подключить к системе подачи воздуха."
+	ru_names = list(
+		NOMINATIVE = "маска чумного доктора",
+		GENITIVE = "маски чумного доктора",
+		DATIVE = "маске чумного доктора",
+		ACCUSATIVE = "маску чумного доктора",
+		INSTRUMENTAL = "маской чумного доктора",
+		PREPOSITIONAL = "маске чумного доктора"
+	)
+	gender = FEMALE
 	icon_state = "plaguedoctor"
-	flags_inv = HIDEEARS|HIDEEYES|HIDEFACE|HIDEFACIALHAIR|HIDESNOUT|HIDEHAIR
-	inhand_icon_state = "gas_mask"
-	has_fov = FALSE
-	clothing_flags = BLOCK_GAS_SMOKE_EFFECT|MASKINTERNALS
+	item_state = "gas_mask"
+	armor = list(MELEE = 0, BULLET = 0, LASER = 2, ENERGY = 2, BOMB = 0, BIO = 75, RAD = 0, FIRE = 0, ACID = 0)
+
+/obj/item/clothing/mask/gas/plaguedoctor/armoured
+	armor = list(MELEE = 5, BULLET = 5, LASER = 5, ENERGY = 5, BOMB = 0, BIO = 10, RAD = 0, FIRE = 10, ACID = 10)
+
+/obj/item/clothing/mask/gas/swat
+	name = "SWAT mask"
+	desc = "Плотно прилегающая к коже тактическая маска, которую можно подключить к системе подачи воздуха."
+	ru_names = list(
+		NOMINATIVE = "маска спецназа",
+		GENITIVE = "маски спецназа",
+		DATIVE = "маске спецназа",
+		ACCUSATIVE = "маску спецназа",
+		INSTRUMENTAL = "маской спецназа",
+		PREPOSITIONAL = "маске спецназа"
+	)
+	gender = FEMALE
+	icon_state = "swat"
+	armor = list(MELEE = 15, BULLET = 15, LASER = 15, ENERGY = 15, BOMB = 15, BIO = 50, RAD = 0, FIRE = 100, ACID = 50)
 
 /obj/item/clothing/mask/gas/syndicate
 	name = "syndicate mask"
-	desc = "A close-fitting tactical mask that can be connected to an air supply."
-	icon_state = "syndicate"
-	inhand_icon_state = "syndicate_gasmask"
-	resistance_flags = FIRE_PROOF | ACID_PROOF
+	desc = "Плотно прилегающая к коже тактическая маска, которую можно подключить к системе подачи воздуха."
+	ru_names = list(
+		NOMINATIVE = "маска Синдиката",
+		GENITIVE = "маски Синдиката",
+		DATIVE = "маске Синдиката",
+		ACCUSATIVE = "маску Синдиката",
+		INSTRUMENTAL = "маской Синдиката",
+		PREPOSITIONAL = "маске Синдиката"
+	)
+	gender = FEMALE
+	icon_state = "swat"
+	armor = list(MELEE = 15, BULLET = 15, LASER = 15, ENERGY = 15, BOMB = 15, BIO = 50, RAD = 0, FIRE = 100, ACID = 50)
 	strip_delay = 60
-	w_class = WEIGHT_CLASS_SMALL
-	has_fov = FALSE
-	fishing_modifier = 0
 
 /obj/item/clothing/mask/gas/clown_hat
 	name = "clown wig and mask"
-	desc = "A true prankster's facial attire. A clown is incomplete without his wig and mask."
-	clothing_flags = MASKINTERNALS
+	desc = "Маскарадный набор настоящего проказника. Клоун никогда не будет полноценным без своего парика и маски. Вы можете изменить её внешний вид в руках."
+	ru_names = list(
+		NOMINATIVE = "клоунский парик с маской",
+		GENITIVE = "клоунского парика с маской",
+		DATIVE = "клоунскому парику с маской",
+		ACCUSATIVE = "клоунский парик с маской",
+		INSTRUMENTAL = "клоунским париком с маской",
+		PREPOSITIONAL = "клоунском парике с маской"
+	)
 	icon_state = "clown"
-	inhand_icon_state = "clown_hat"
-	lefthand_file = 'icons/mob/inhands/clothing/hats_lefthand.dmi'
-	righthand_file = 'icons/mob/inhands/clothing/hats_righthand.dmi'
-	dye_color = DYE_CLOWN
-	w_class = WEIGHT_CLASS_SMALL
+	item_state = "clown_hat"
+	flags_inv = parent_type::flags_inv|HIDEHAIR
+
+	var/static/list/mask_type = list("Истинная форма" = /obj/item/clothing/mask/gas/clown_hat,
+							"Женственная форма" = /obj/item/clothing/mask/gas/clown_hat/sexy,
+							"Безумная форма" = /obj/item/clothing/mask/gas/clown_hat/joker,
+							"Радужная форма" = /obj/item/clothing/mask/gas/clown_hat/rainbow)
+	var/static/list/mask_icons = list("Истинная форма" = image(icon = 'icons/obj/clothing/mask.dmi', icon_state = "clown"),
+							"Женственная форма" = image(icon = 'icons/obj/clothing/mask.dmi', icon_state = "sexyclown"),
+							"Безумная форма" = image(icon = 'icons/obj/clothing/mask.dmi', icon_state = "joker"),
+							"Радужная форма" = image(icon = 'icons/obj/clothing/mask.dmi', icon_state = "rainbow"))
+
 	flags_cover = MASKCOVERSEYES
-	clothing_traits = list(TRAIT_PERCEIVED_AS_CLOWN)
 	resistance_flags = FLAMMABLE
-	actions_types = list(/datum/action/item_action/adjust)
 	dog_fashion = /datum/dog_fashion/head/clown
-	has_fov = FALSE
-	var/list/clownmask_designs = list()
-	voice_filter = null // performer masks expect to be talked through
-	fishing_modifier = 0
 
-/obj/item/clothing/mask/gas/clown_hat/plasmaman
-	starting_filter_type = /obj/item/gas_filter/plasmaman
+/obj/item/clothing/mask/gas/clown_hat/proc/mask_action(mob/user)
+	var/mask_choice = show_radial_menu(user, src, mask_icons)
+	var/picked_mask = mask_type[mask_choice]
 
-/obj/item/clothing/mask/gas/clown_hat/Initialize(mapload)
-	.=..()
-	clownmask_designs = list(
-		"True Form" = image(icon = src.icon, icon_state = "clown"),
-		"The Coquette" = image(icon = src.icon, icon_state = "sexyclown"),
-		"The Jester" = image(icon = src.icon, icon_state = "chaos"),
-		"The Madman" = image(icon = src.icon, icon_state = "joker"),
-		"The Rainbow Color" = image(icon = src.icon, icon_state = "rainbow")
-		)
-	AddElement(/datum/element/swabable, CELL_LINE_TABLE_CLOWN, CELL_VIRUS_TABLE_GENERIC, rand(2,3), 0)
-
-/obj/item/clothing/mask/gas/clown_hat/ui_action_click(mob/user)
-	if(!istype(user) || user.incapacitated)
+	if(QDELETED(src) || !picked_mask)
 		return
+	if(user.stat || !in_range(user, src))
+		return
+	var/obj/item/clothing/mask/gas/clown_hat/new_mask = new picked_mask(get_turf(user))
+	qdel(src)
+	var/obj/item/clothing/weared_mask = user.get_item_by_slot(ITEM_SLOT_MASK)
+	if(user.wear_mask)
+		user.drop_item_ground(weared_mask)
+	user.equip_to_slot(new_mask, ITEM_SLOT_MASK)
+	user.balloon_alert(user, "внешний вид изменён!")
+	return TRUE
 
-	var/choice = show_radial_menu(user,src, clownmask_designs, custom_check = FALSE, radius = 36, require_near = TRUE)
-	if(!choice)
-		return FALSE
+/obj/item/clothing/mask/gas/clown_hat/attack_self(mob/user)
+	mask_action(user)
 
-	if(src && choice && !user.incapacitated && in_range(user,src))
-		var/list/options = GLOB.clown_mask_options
-		icon_state = options[choice]
-		user.update_worn_mask()
-		update_item_action_buttons()
-		to_chat(user, span_notice("Your Clown Mask has now morphed into [choice], all praise the Honkmother!"))
-		return TRUE
+/obj/item/clothing/mask/gas/clown_hat/click_alt(mob/user)
+	mask_action(user)
 
-/obj/item/clothing/mask/gas/sexyclown
+/obj/item/clothing/mask/gas/clown_hat/sexy
 	name = "sexy-clown wig and mask"
-	desc = "A feminine clown mask for the dabbling crossdressers or female entertainers."
-	clothing_flags = MASKINTERNALS
+	desc = "Женственная клоунская маска для начинающих кроссдрессеров или женщин - артисток. Вы можете изменить её внешний вид в руках."
+	ru_names = list(
+		NOMINATIVE = "сексуальный клоунский парик с маской",
+		GENITIVE = "сексуального клоунского парика с маской",
+		DATIVE = "сексуальному клоунскому парику с маской",
+		ACCUSATIVE = "сексуальный клоунский парик с маской",
+		INSTRUMENTAL = "сексуальным клоунским париком с маской",
+		PREPOSITIONAL = "сексуальном клоунском парике с маской"
+	)
 	icon_state = "sexyclown"
-	inhand_icon_state = "sexyclown_hat"
-	lefthand_file = 'icons/mob/inhands/clothing/hats_lefthand.dmi'
-	righthand_file = 'icons/mob/inhands/clothing/hats_righthand.dmi'
+	item_state = "sexyclown"
+
+/obj/item/clothing/mask/gas/clown_hat/joker
+	name = "deranged clown wig and mask"
+	desc = "Дурацкая клоунская маска, вызывающее безумное веселье. Вы можете изменить её внешний вид в руках."
+	ru_names = list(
+		NOMINATIVE = "клоунский парик с маской настоящего безумца",
+		GENITIVE = "клоунского парика с маской настоящего безумца",
+		DATIVE = "клоунскому парику с маской настоящего безумца",
+		ACCUSATIVE = "клоунский парик с маской настоящего безумца",
+		INSTRUMENTAL = "клоунским париком с маской настоящего безумца",
+		PREPOSITIONAL = "клоунском парике с маской настоящего безумца"
+	)
+	icon_state = "joker"
+	item_state = "joker"
+
+/obj/item/clothing/mask/gas/clown_hat/rainbow
+	name = "rainbow clown wig and mask"
+	desc = "Разноцветная клоунская маска для тех, кто любит ослеплять и впечатлять публику. Вы можете изменить её внешний вид в руках."
+	ru_names = list(
+		NOMINATIVE = "радужный клоунский парик с маской",
+		GENITIVE = "радужного клоунского парика с маской",
+		DATIVE = "радужному клоунскому парику с маской",
+		ACCUSATIVE = "радужный клоунский парик с маской",
+		INSTRUMENTAL = "радужным клоунским париком с маской",
+		PREPOSITIONAL = "радужном клоунском парике с маской"
+	)
+	icon_state = "rainbow"
+	item_state = "rainbow"
+	sprite_sheets = list(
+		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/head.dmi',
+		SPECIES_WRYN = 'icons/mob/clothing/species/wryn/mask.dmi'
+	)
+
+/obj/item/clothing/mask/gas/clownwiz
+	name = "wizard clown wig and mask"
+	desc = "Некоторые приколы невозможно провернуть без крупицы магии."
+	ru_names = list(
+		NOMINATIVE = "магический клоунский парик с маской",
+		GENITIVE = "магического клоунского парика с маской",
+		DATIVE = "магическому клоунскому парику с маской",
+		ACCUSATIVE = "магический клоунский парик с маской",
+		INSTRUMENTAL = "магическим клоунским париком с маской",
+		PREPOSITIONAL = "магическом клоунском парике с маской"
+	)
+	icon_state = "wizzclown"
+	item_state = "wizzclown"
 	flags_cover = MASKCOVERSEYES
-	resistance_flags = FLAMMABLE
-	has_fov = FALSE
-	fishing_modifier = 0
+	flags_inv = HIDEHEADSETS|HIDEGLASSES|HIDEHAIR
+	magical = TRUE
+
+
+/obj/item/clothing/mask/gas/clown_hat/nodrop
+
+
+/obj/item/clothing/mask/gas/clown_hat/nodrop/Initialize(mapload)
+	. = ..()
+	ADD_TRAIT(src, TRAIT_NODROP, INNATE_TRAIT)
+
 
 /obj/item/clothing/mask/gas/mime
-	name = "mime mask"
-	desc = "The traditional mime's mask. It has an eerie facial posture."
-	clothing_flags = MASKINTERNALS
-	icon_state = "mime"
-	inhand_icon_state = null
-	w_class = WEIGHT_CLASS_SMALL
+	name = "happy mime mask"
+	desc = "Классическая театральная маска, для мастеров пантомимы."
+	ru_names = list(
+		NOMINATIVE = "счастливая маска мима",
+		GENITIVE = "счастливой маски мима",
+		DATIVE = "счастливой маске мима",
+		ACCUSATIVE = "счастливую маску мима",
+		INSTRUMENTAL = "счастливой маской мима",
+		PREPOSITIONAL = "счастливой маске мима"
+	)
+	gender = FEMALE
+	icon_state = "happymask"
+	item_state = "mime"
+
+	var/static/list/mask_type = list("Счастливая маска" = /obj/item/clothing/mask/gas/mime,
+							"Печальная маска" = /obj/item/clothing/mask/gas/mime/sad,
+							"Злобная маска" = /obj/item/clothing/mask/gas/mime/angry,
+							"Равнодушная маска" = /obj/item/clothing/mask/gas/mime/clueless,
+							"Маска Трагика" = /obj/item/clothing/mask/gas/mime/morutopia,
+							"Сексуальная маска" = /obj/item/clothing/mask/gas/mime/sexy)
+	var/static/list/mask_icons = list("Счастливая маска" = image(icon = 'icons/obj/clothing/mask.dmi', icon_state = "happymask"),
+							"Печальная маска" = image(icon = 'icons/obj/clothing/mask.dmi', icon_state = "sadmask"),
+							"Злобная маска" = image(icon = 'icons/obj/clothing/mask.dmi', icon_state = "angrymask"),
+							"Равнодушная маска" = image(icon = 'icons/obj/clothing/mask.dmi', icon_state = "cluelessmask"),
+							"Маска Трагика" = image(icon = 'icons/obj/clothing/mask.dmi', icon_state = "morutopia"),
+							"Сексуальная маска" = image(icon = 'icons/obj/clothing/mask.dmi', icon_state = "sexymime"))
+
 	flags_cover = MASKCOVERSEYES
 	resistance_flags = FLAMMABLE
-	actions_types = list(/datum/action/item_action/adjust)
-	species_exception = list(/datum/species/golem)
-	has_fov = FALSE
-	fishing_modifier = 0
-	var/list/mimemask_designs = list()
 
-/obj/item/clothing/mask/gas/mime/plasmaman
-	starting_filter_type = /obj/item/gas_filter/plasmaman
+/obj/item/clothing/mask/gas/mime/proc/mask_action(mob/user)
+	var/mask_choice = show_radial_menu(user, src, mask_icons)
+	var/picked_mask = mask_type[mask_choice]
 
-/obj/item/clothing/mask/gas/mime/Initialize(mapload)
-	.=..()
-	mimemask_designs = list(
-		"Blanc" = image(icon = src.icon, icon_state = "mime"),
-		"Excité" = image(icon = src.icon, icon_state = "sexymime"),
-		"Triste" = image(icon = src.icon, icon_state = "sadmime"),
-		"Effrayé" = image(icon = src.icon, icon_state = "scaredmime")
-		)
+	if(QDELETED(src) || !picked_mask)
+		return
+	if(user.stat || !in_range(user, src))
+		return
+	var/obj/item/clothing/mask/gas/mime/new_mask = new picked_mask(get_turf(user))
+	qdel(src)
+	var/obj/item/clothing/weared_mask = user.get_item_by_slot(ITEM_SLOT_MASK)
+	if(user.wear_mask)
+		user.drop_item_ground(weared_mask)
+	user.equip_to_slot(new_mask, ITEM_SLOT_MASK)
+	user.balloon_alert(user, "внешний вид изменён!")
+	return TRUE
 
-/obj/item/clothing/mask/gas/mime/ui_action_click(mob/user)
-	if(!istype(user) || user.incapacitated)
+/obj/item/clothing/mask/gas/mime/attack_self(mob/user)
+	mask_action(user)
+
+/obj/item/clothing/mask/gas/mime/click_alt(mob/user)
+	mask_action(user)
+
+/obj/item/clothing/mask/gas/mime/equipped(mob/user, slot, initial)
+	. = ..()
+
+	if(!user?.mind || slot != ITEM_SLOT_MASK)
 		return
 
-	var/list/options = list()
-	options["Blanc"] = "mime"
-	options["Triste"] = "sadmime"
-	options["Effrayé"] = "scaredmime"
-	options["Excité"] ="sexymime"
+	var/obj/effect/proc_holder/spell/mime/speak/mask/mask_spell = null
+	for(var/obj/effect/proc_holder/spell/mime/speak/spell in user.mind.spell_list)
+		if(istype(spell, /obj/effect/proc_holder/spell/mime/speak/mask))
+			mask_spell = spell
+			continue
+		if(spell)
+			return
 
-	var/choice = show_radial_menu(user,src, mimemask_designs, custom_check = FALSE, radius = 36, require_near = TRUE)
-	if(!choice)
-		return FALSE
+	if(mask_spell)
+		mask_spell.action.enable_invisibility(FALSE)
+		return
 
-	if(src && choice && !user.incapacitated && in_range(user,src))
-		icon_state = options[choice]
-		user.update_worn_mask()
-		update_item_action_buttons()
-		to_chat(user, span_notice("Your Mime Mask has now morphed into [choice]!"))
-		return TRUE
+	user.mind.AddSpell(new /obj/effect/proc_holder/spell/mime/speak/mask)
+
+
+/obj/item/clothing/mask/gas/mime/dropped(mob/user, slot, silent = FALSE)
+	. = ..()
+
+	if(!user?.mind || slot != ITEM_SLOT_MASK)
+		return
+
+	var/obj/effect/proc_holder/spell/mime/speak/mask/spell = locate() in user.mind.spell_list
+	if(!spell)
+		return
+
+	if(spell.cooldown_handler.is_on_cooldown())
+		spell.action.enable_invisibility(TRUE)
+		return
+
+	if(user.mind.miming)
+		spell.cast(list(user))
+	user.mind.RemoveSpell(spell)
+
+/obj/item/clothing/mask/gas/mime/sad
+	name = "sad mime mask"
+	ru_names = list(
+		NOMINATIVE = "печальная маска мима",
+		GENITIVE = "печальной маски мима",
+		DATIVE = "печальной маске мима",
+		ACCUSATIVE = "печальную маску мима",
+		INSTRUMENTAL = "печальной маской мима",
+		PREPOSITIONAL = "печальной маске мима"
+	)
+	icon_state = "sadmask"
+
+/obj/item/clothing/mask/gas/mime/angry
+	name = "angry mime mask"
+	ru_names = list(
+		NOMINATIVE = "злобная маска мима",
+		GENITIVE = "злобной маски мима",
+		DATIVE = "злобной маске мима",
+		ACCUSATIVE = "злобную маску мима",
+		INSTRUMENTAL = "злобной маской мима",
+		PREPOSITIONAL = "злобной маске мима"
+	)
+	icon_state = "angrymask"
+
+/obj/item/clothing/mask/gas/mime/clueless
+	name = "clueless mime mask"
+	ru_names = list(
+		NOMINATIVE = "равнодушная маска мима",
+		GENITIVE = "равнодушной маски мима",
+		DATIVE = "равнодушной маске мима",
+		ACCUSATIVE = "равнодушную маску мима",
+		INSTRUMENTAL = "равнодушной маской мима",
+		PREPOSITIONAL = "равнодушной маске мима"
+	)
+	icon_state = "cluelessmask"
+
+/obj/item/clothing/mask/gas/mime/morutopia
+	name = "Tragedian mask"
+	ru_names = list(
+		NOMINATIVE = "маска Трагика",
+		GENITIVE = "маски Трагика",
+		DATIVE = "маске Трагика",
+		ACCUSATIVE = "маску Трагика",
+		INSTRUMENTAL = "маской Трагика",
+		PREPOSITIONAL = "маске Трагика"
+	)
+	icon_state = "morutopia"
+
+/obj/item/clothing/mask/gas/mime/wizard
+	name = "magical mime mask"
+	desc = "Маска мима, которая сверкает от наполняющей её силы. Её глаза смотрят вам в душу."
+	ru_names = list(
+		NOMINATIVE = "магическая маска мима",
+		GENITIVE = "магической маски мима",
+		DATIVE = "магической маске мима",
+		ACCUSATIVE = "магическую маску мима",
+		INSTRUMENTAL = "магической маской мима",
+		PREPOSITIONAL = "магической маске мима"
+	)
+	flags_inv = HIDEHEADSETS|HIDEGLASSES
+	magical = TRUE
+
+
+/obj/item/clothing/mask/gas/mime/nodrop
+
+
+/obj/item/clothing/mask/gas/mime/nodrop/Initialize(mapload)
+	. = ..()
+	ADD_TRAIT(src, TRAIT_NODROP, INNATE_TRAIT)
+
 
 /obj/item/clothing/mask/gas/monkeymask
 	name = "monkey mask"
-	desc = "A mask used when acting as a monkey."
-	clothing_flags = MASKINTERNALS
+	desc = "Маска, которую надевают, когда ведут себя как макаки."
+	ru_names = list(
+		NOMINATIVE = "маска обезьяны",
+		GENITIVE = "маски обезьяны",
+		DATIVE = "маске обезьяны",
+		ACCUSATIVE = "маску обезьяны",
+		INSTRUMENTAL = "маской обезьяны",
+		PREPOSITIONAL = "маске обезьяны"
+	)
+	gender = FEMALE
 	icon_state = "monkeymask"
-	inhand_icon_state = "owl_mask"
-	flags_cover = MASKCOVERSEYES
+	item_state = "monkeymask"
 	resistance_flags = FLAMMABLE
-	has_fov = FALSE
-	fishing_modifier = 0
 
-/obj/item/clothing/mask/gas/sexymime
+/obj/item/clothing/mask/gas/mime/sexy
 	name = "sexy mime mask"
-	desc = "A traditional female mime's mask."
-	clothing_flags = MASKINTERNALS
+	desc = "Классическая женская маска мима."
+	ru_names = list(
+		NOMINATIVE = "сексуальная маска мима",
+		GENITIVE = "сексуальной маски мима",
+		DATIVE = "сексуальной маске мима",
+		ACCUSATIVE = "сексуальную маску мима",
+		INSTRUMENTAL = "сексуальной маской мима",
+		PREPOSITIONAL = "сексуальной маске мима"
+	)
+	gender = FEMALE
 	icon_state = "sexymime"
-	inhand_icon_state = null
-	flags_cover = MASKCOVERSEYES
-	resistance_flags = FLAMMABLE
-	species_exception = list(/datum/species/golem)
-	has_fov = FALSE
-	fishing_modifier = 0
+	item_state = "sexymime"
 
 /obj/item/clothing/mask/gas/cyborg
 	name = "cyborg visor"
-	desc = "Beep boop."
+	desc = "Бип буп."
+	ru_names = list(
+		NOMINATIVE = "визор робота",
+		GENITIVE = "визора робота",
+		DATIVE = "визору робота",
+		ACCUSATIVE = "визор робота",
+		INSTRUMENTAL = "визором робота",
+		PREPOSITIONAL = "визоре робота"
+	)
 	icon_state = "death"
 	resistance_flags = FLAMMABLE
-	has_fov = FALSE
-	flags_cover = MASKCOVERSEYES
-	fishing_modifier = 0
 
 /obj/item/clothing/mask/gas/owl_mask
 	name = "owl mask"
-	desc = "Twoooo!"
+	desc = "У-у-у-у!"
+	ru_names = list(
+		NOMINATIVE = "маска совы",
+		GENITIVE = "маски совы",
+		DATIVE = "маске совы",
+		ACCUSATIVE = "маску совы",
+		INSTRUMENTAL = "маской совы",
+		PREPOSITIONAL = "маске совы"
+	)
+	gender = FEMALE
 	icon_state = "owl"
-	inhand_icon_state = "owl_mask"
-	clothing_flags = MASKINTERNALS
-	flags_cover = MASKCOVERSEYES
 	resistance_flags = FLAMMABLE
-	has_fov = FALSE
-	fishing_modifier = -1
+	actions_types = list(/datum/action/item_action/hoot)
 
-/obj/item/clothing/mask/gas/carp
-	name = "carp mask"
-	desc = "Gnash gnash."
-	icon_state = "carp_mask"
-	inhand_icon_state = null
-	has_fov = FALSE
-	flags_cover = MASKCOVERSEYES
-	fishing_modifier = -3
 
-/obj/item/clothing/mask/gas/tiki_mask
-	name = "tiki mask"
-	desc = "A creepy wooden mask. Surprisingly expressive for a poorly carved bit of wood."
-	icon_state = "tiki_eyebrow"
-	inhand_icon_state = null
-	custom_materials = list(/datum/material/wood = SHEET_MATERIAL_AMOUNT * 1.25)
-	resistance_flags = FLAMMABLE
-	has_fov = FALSE
-	flags_cover = MASKCOVERSEYES
-	max_integrity = 100
-	actions_types = list(/datum/action/item_action/adjust)
-	dog_fashion = null
-	fishing_modifier = -2
-	var/list/tikimask_designs = list()
+/obj/item/clothing/mask/gas/owl_mask/super_hero
 
-/obj/item/clothing/mask/gas/tiki_mask/Initialize(mapload)
-	.=..()
-	tikimask_designs = list(
-		"Original Tiki" = image(icon = src.icon, icon_state = "tiki_eyebrow"),
-		"Happy Tiki" = image(icon = src.icon, icon_state = "tiki_happy"),
-		"Confused Tiki" = image(icon = src.icon, icon_state = "tiki_confused"),
-		"Angry Tiki" = image(icon = src.icon, icon_state = "tiki_angry")
-		)
 
-/obj/item/clothing/mask/gas/tiki_mask/ui_action_click(mob/user)
-	var/mob/M = usr
-	var/list/options = list()
-	options["Original Tiki"] = "tiki_eyebrow"
-	options["Happy Tiki"] = "tiki_happy"
-	options["Confused Tiki"] = "tiki_confused"
-	options["Angry Tiki"] ="tiki_angry"
+/obj/item/clothing/mask/gas/owl_mask/super_hero/Initialize(mapload)
+	. = ..()
+	ADD_TRAIT(src, TRAIT_NODROP, INNATE_TRAIT)
 
-	var/choice = show_radial_menu(user,src, tikimask_designs, custom_check = FALSE, radius = 36, require_near = TRUE)
-	if(!choice)
-		return FALSE
 
-	if(src && choice && !M.stat && in_range(M,src))
-		icon_state = options[choice]
-		user.update_worn_mask()
-		update_item_action_buttons()
-		to_chat(M, span_notice("The Tiki Mask has now changed into the [choice] Mask!"))
-		return 1
+/obj/item/clothing/mask/gas/owl_mask/attack_self()
+	hoot()
 
-/obj/item/clothing/mask/gas/tiki_mask/yalp_elor
-	icon_state = "tiki_yalp"
-	actions_types = list()
+/obj/item/clothing/mask/gas/owl_mask/proc/hoot()
+	if(cooldown < world.time - 35) // A cooldown, to stop people being jerks
+		playsound(src.loc, 'sound/creatures/hoot.ogg', 50, TRUE)
+		cooldown = world.time
 
-/obj/item/clothing/mask/gas/hunter
-	name = "bounty hunting mask"
-	desc = "A custom tactical mask with decals added."
-	icon_state = "hunter"
-	inhand_icon_state = "gas_atmos"
-	resistance_flags = FIRE_PROOF | ACID_PROOF
-	flags_inv = HIDEFACIALHAIR|HIDEFACE|HIDEEYES|HIDEEARS|HIDEHAIR|HIDESNOUT
-	has_fov = FALSE
-	fishing_modifier = -2
+// ********************************************************************
 
-/obj/item/clothing/mask/gas/prop
-	name = "prop gas mask"
-	desc = "A prop gas mask designed for appearance. Unlike a normal gas mask this does not filter gasses or protect against pepper spray."
-	icon_state = "gas_prop"
-	inhand_icon_state = "gas_prop"
-	clothing_flags = NONE
+// **** Security gas mask ****
+
+/obj/item/clothing/mask/gas/sechailer
+	name = "security gas mask"
+	desc = "Стандартный противогаз, выдаваемый службе безопасности. Внутри установлен \"Подчи-о-натор 3000\", который проигрывает с дюжину фраз, требующих всякое отребье прекратить всякое сопротивление."
+	ru_names = list(
+		NOMINATIVE = "противогаз службы безопасности",
+		GENITIVE = "противогаза службы безопасности",
+		DATIVE = "противогазу службы безопасности",
+		ACCUSATIVE = "противогаз службы безопасности",
+		INSTRUMENTAL = "противогазом службы безопасности",
+		PREPOSITIONAL = "противогазе службы безопасности"
+	)
+	icon_state = "sechailer"
+	item_state = "sechailer"
+	armor = list(MELEE = 5, BULLET = 5, LASER = 5, ENERGY = 5, BOMB = 0, BIO = 10, RAD = 0, FIRE = 10, ACID = 10)
+	flags_inv = HIDENAME
 	flags_cover = MASKCOVERSMOUTH
-	resistance_flags = FLAMMABLE
-	has_fov = FALSE
-	fishing_modifier = 0
+	adjusted_flags_inv = HIDENAME
+	clothing_traits = list(TRAIT_SECDEATH)
+	var/phrase = 1
+	var/aggressiveness = 1
+	var/safety = 1
+	can_toggle = TRUE
+	actions_types = list(/datum/action/item_action/halt, /datum/action/item_action/adjust, /datum/action/item_action/selectphrase)
+	var/phrase_list = list(
 
-/obj/item/clothing/mask/gas/atmosprop
-	name = "prop atmospheric gas mask"
-	desc = "A prop atmospheric gas mask designed for appearance. Unlike a normal atmospheric gas mask this does not filter gasses or protect against pepper spray."
-	worn_icon_state = "gas_prop_atmos"
-	icon_state = "gas_atmos"
-	inhand_icon_state = "gas_atmos"
-	clothing_flags = NONE
+								"halt" 			= "HALT! HALT! HALT! HALT!",
+								"bobby" 		= "Stop in the name of the Law.",
+								"compliance"	= "Compliance is in your best interest.",
+								"justice"		= "Prepare for justice!",
+								"running"		= "Running will only increase your sentence.",
+								"dontmove"		= "Don't move, Creep!",
+								"floor"			= "Down on the floor, Creep!",
+								"robocop"		= "Dead or alive you're coming with me.",
+								"god"			= "God made today for the crooks we could not catch yesterday.",
+								"freeze"		= "Freeze, Scum Bag!",
+								"imperial"		= "Stop right there, criminal scum!",
+								"bash"			= "Stop or I'll bash you.",
+								"harry"			= "Go ahead, make my day.",
+								"asshole"		= "Stop breaking the law, asshole.",
+								"stfu"			= "You have the right to shut the fuck up",
+								"shutup"		= "Shut up crime!",
+								"super"			= "Face the wrath of the golden bolt.",
+								"dredd"			= "I am, the LAW!"
+								)
+
+
+/obj/item/clothing/mask/gas/sechailer/adjustmask(user)
+	. = ..()
+	if(.)
+		w_class = up ? WEIGHT_CLASS_SMALL : WEIGHT_CLASS_NORMAL
+
+
+/obj/item/clothing/mask/gas/sechailer/force_adjust_mask()
+	. = ..()
+	w_class = WEIGHT_CLASS_SMALL
+
+
+/obj/item/clothing/mask/gas/sechailer/folded/Initialize(mapload)
+	. = ..()
+	force_adjust_mask()
+
+/obj/item/clothing/mask/gas/sechailer/tactical
+	name = "Security gas mask FCO-26"
+	desc = "Тактический противогаз чёрного цвета с красными обзорными стёклами. Разработан компанией N&R специально для сотрудников станционной службы безопасности НаноТрейзен. Обеспечивает защиту лица, глаз и органов дыхания от неблагоприятных условий внешней среды."
+	ru_names = list(
+		NOMINATIVE = "тактический противогаз СБ",
+		GENITIVE = "тактического противогаза СБ",
+		DATIVE = "тактическому противогазу СБ",
+		ACCUSATIVE = "тактический противогаз СБ",
+		INSTRUMENTAL = "тактическим противогазом СБ",
+		PREPOSITIONAL = "тактическом противогазе СБ"
+	)
+	icon_state = "tactical_mask"
+	armor = list(MELEE = 10, BULLET = 5, LASER = 5, ENERGY = 5, BOMB = 0, BIO = 50, RAD = 0, FIRE = 10, ACID = 30)
+	aggressiveness = 3
+	phrase = 12
+	can_toggle = FALSE
+	actions_types = list(/datum/action/item_action/halt, /datum/action/item_action/selectphrase)
+
+/obj/item/clothing/mask/gas/sechailer/hos
+	name = "HOS SWAT mask"
+	desc = "Тактический противогаз чёрного цвета с более агрессивным Подчи-о-натором 3000."
+	ru_names = list(
+		NOMINATIVE = "тактический противогаз ГСБ",
+		GENITIVE = "тактического противогаза ГСБ",
+		DATIVE = "тактическому противогазу ГСБ",
+		ACCUSATIVE = "тактический противогаз ГСБ",
+		INSTRUMENTAL = "тактическим противогазом ГСБ",
+		PREPOSITIONAL = "тактическом противогазе ГСБ"
+	)
+	icon_state = "hosmask"
+	armor = list(MELEE = 10, BULLET = 10, LASER = 10, ENERGY = 10, BOMB = 10, BIO = 50, RAD = 0, FIRE = 100, ACID = 50)
+	aggressiveness = 3
+	phrase = 12
+	can_toggle = FALSE
+	actions_types = list(/datum/action/item_action/halt, /datum/action/item_action/selectphrase)
+
+/obj/item/clothing/mask/gas/sechailer/warden
+	name = "Warden SWAT mask"
+	desc = "Тактический противогаз синего цвета с более агрессивным Подчи-о-натором 3000."
+	ru_names = list(
+		NOMINATIVE = "тактический противогаз смотрителя",
+		GENITIVE = "тактического противогаза смотрителя",
+		DATIVE = "тактическому противогазу смотрителя",
+		ACCUSATIVE = "тактический противогаз смотрителя",
+		INSTRUMENTAL = "тактическим противогазом смотрителя",
+		PREPOSITIONAL = "тактическом противогазе смотрителя"
+	)
+	icon_state = "wardenmask"
+	armor = list(MELEE = 10, BULLET = 10, LASER = 10, ENERGY = 10, BOMB = 10, BIO = 50, RAD = 0, FIRE = 100, ACID = 50)
+	aggressiveness = 3
+	phrase = 12
+	can_toggle = FALSE
+	actions_types = list(/datum/action/item_action/halt, /datum/action/item_action/selectphrase)
+
+/obj/item/clothing/mask/gas/sechailer/swat
+	name = "SWAT mask"
+	desc = "Тактический противогаз с более агрессивным Подчи-о-натором 3000."
+	ru_names = list(
+		NOMINATIVE = "тактический противогаз",
+		GENITIVE = "тактического противогаза",
+		DATIVE = "тактическому противогазу",
+		ACCUSATIVE = "тактический противогаз",
+		INSTRUMENTAL = "тактическим противогазом",
+		PREPOSITIONAL = "тактическом противогазе"
+	)
+	icon_state = "officermask"
+	armor = list(MELEE = 10, BULLET = 10, LASER = 10, ENERGY = 10, BOMB = 10, BIO = 50, RAD = 0, FIRE = 100, ACID = 50)
+	aggressiveness = 3
+	phrase = 12
+	can_toggle = FALSE
+	actions_types = list(/datum/action/item_action/halt, /datum/action/item_action/selectphrase)
+
+/obj/item/clothing/mask/gas/sechailer/blue
+	name = "blue SWAT mask"
+	desc = "Тактический противогаз, окрашенный в неоново-синие цвета. Используется для деморализации Грейтадеров."
+	ru_names = list(
+		NOMINATIVE = "синий тактический противогаз",
+		GENITIVE = "синего тактического противогаза",
+		DATIVE = "синему тактическому противогазу",
+		ACCUSATIVE = "синий тактический противогаз",
+		INSTRUMENTAL = "синимтактическим противогазом",
+		PREPOSITIONAL = "синем тактическом противогазе"
+	)
+	icon_state = "blue_sechailer"
+	item_state = "blue_sechailer"
+	armor = list(MELEE = 10, BULLET = 10, LASER = 10, ENERGY = 10, BOMB = 10, BIO = 50, RAD = 0, FIRE = 100, ACID = 50)
+	aggressiveness = 3
+	phrase = 12
+	can_toggle = FALSE
+	actions_types = list(/datum/action/item_action/halt, /datum/action/item_action/selectphrase)
+
+/obj/item/clothing/mask/gas/sechailer/cyborg
+	name = "security hailer"
+	desc = "Набор предзаписанных сообщений, которые киборги используют при преследовании преступников."
+	ru_names = list(
+		NOMINATIVE = "мегафон службы безопасности",
+		GENITIVE = "мегафона службы безопасности",
+		DATIVE = "мегафону службы безопасности",
+		ACCUSATIVE = "мегафон службы безопасности",
+		INSTRUMENTAL = "мегафоном службы безопасности",
+		PREPOSITIONAL = "мегафоне службы безопасности"
+	)
+	icon = 'icons/obj/device.dmi'
+	icon_state = "taperecorder_idle"
+	can_toggle = FALSE
+	actions_types = list(/datum/action/item_action/halt, /datum/action/item_action/selectphrase)
+
+/obj/item/clothing/mask/gas/sechailer/ui_action_click(mob/user, datum/action/action, leftclick)
+	if(istype(action, /datum/action/item_action/halt))
+		halt()
+	else if(istype(action, /datum/action/item_action/adjust))
+		adjustmask(user)
+	else if(istype(action, /datum/action/item_action/selectphrase))
+		var/key = phrase_list[phrase]
+		var/message = phrase_list[key]
+
+		if (!safety)
+			to_chat(user, "<span class='notice'>You set the restrictor to: FUCK YOUR CUNT YOU SHIT EATING COCKSUCKER MAN EAT A DONG FUCKING ASS RAMMING SHIT FUCK EAT PENISES IN YOUR FUCK FACE AND SHIT OUT ABORTIONS OF FUCK AND DO SHIT IN YOUR ASS YOU COCK FUCK SHIT MONKEY FUCK ASS WANKER FROM THE DEPTHS OF SHIT.</span>")
+			return
+
+		switch(aggressiveness)
+			if(1)
+				phrase = (phrase < 6) ? (phrase + 1) : 1
+				key = phrase_list[phrase]
+				message = phrase_list[key]
+				to_chat(user,"<span class='notice'>You set the restrictor to: [message]</span>")
+			if(2)
+				phrase = (phrase < 11 && phrase >= 7) ? (phrase + 1) : 7
+				key = phrase_list[phrase]
+				message = phrase_list[key]
+				to_chat(user,"<span class='notice'>You set the restrictor to: [message]</span>")
+			if(3)
+				phrase = (phrase < 18 && phrase >= 12 ) ? (phrase + 1) : 12
+				key = phrase_list[phrase]
+				message = phrase_list[key]
+				to_chat(user,"<span class='notice'>You set the restrictor to: [message]</span>")
+			if(4)
+				phrase = (phrase < 18 && phrase >= 1 ) ? (phrase + 1) : 1
+				key = phrase_list[phrase]
+				message = phrase_list[key]
+				to_chat(user,"<span class='notice'>You set the restrictor to: [message]</span>")
+			else
+				to_chat(user, "<span class='notice'>It's broken.</span>")
+
+		var/datum/action/item_action/halt/halt_action = locate() in actions
+		if(halt_action)
+			halt_action.name = "[uppertext(key)]!"
+			halt_action.UpdateButtonIcon()
+
+
+/obj/item/clothing/mask/gas/sechailer/screwdriver_act(mob/living/user, obj/item/I)
+	. = TRUE
+	if(!I.use_tool(src, user, volume = I.tool_volume))
+		return .
+	switch(aggressiveness)
+		if(1)
+			to_chat(user, span_notice("You set the aggressiveness restrictor to the second position."))
+			aggressiveness = 2
+			phrase = 7
+		if(2)
+			to_chat(user, span_notice("You set the aggressiveness restrictor to the third position."))
+			aggressiveness = 3
+			phrase = 13
+		if(3)
+			to_chat(user, span_notice("You set the aggressiveness restrictor to the fourth position."))
+			aggressiveness = 4
+			phrase = 1
+		if(4)
+			to_chat(user, span_notice("You set the aggressiveness restrictor to the first position."))
+			aggressiveness = 1
+			phrase = 1
+		if(5)
+			to_chat(user, span_warning("You adjust the restrictor but nothing happens, probably because its broken."))
+
+
+/obj/item/clothing/mask/gas/sechailer/wirecutter_act(mob/living/user, obj/item/I)
+	. = TRUE
+	if(aggressiveness == 5)
+		to_chat(user, span_warning("The [name] is already broken."))
+		return .
+	var/confirm = tgui_alert(user, "Do you want to cut off the voice modulator? Warning: It will destroy mask's functionality.", "Cut voice modulator?", list("Yes", "No"))
+	if(confirm != "Yes" || aggressiveness == 5 || !Adjacent(user) || user.incapacitated())
+		return .
+	if(!I.use_tool(src, user, volume = I.tool_volume))
+		return .
+	aggressiveness = 5
+	to_chat(user, span_warning("You have cut off the voice modulator, the mask is broken now."))
+
+
+/obj/item/clothing/mask/gas/sechailer/attack_self(mob/user)
+	adjustmask(user)
+
+/obj/item/clothing/mask/gas/sechailer/emag_act(mob/user)
+	if(safety)
+		safety = 0
+		if(user)
+			to_chat(user, "<span class='warning'>You silently fry [src]'s vocal circuit with the cryptographic sequencer.")
+
+/obj/item/clothing/mask/gas/sechailer/proc/halt()
+	var/key = phrase_list[phrase]
+	var/message = phrase_list[key]
+
+
+	if(cooldown < world.time - 35) // A cooldown, to stop people being jerks
+		if(!safety)
+			message = "FUCK YOUR CUNT YOU SHIT EATING COCKSUCKER MAN EAT A DONG FUCKING ASS RAMMING SHIT FUCK EAT PENISES IN YOUR FUCK FACE AND SHIT OUT ABORTIONS OF FUCK AND DO SHIT IN YOUR ASS YOU COCK FUCK SHIT MONKEY FUCK ASS WANKER FROM THE DEPTHS OF SHIT."
+			usr.visible_message("[usr]'s Compli-o-Nator: <font color='red' size='4'><b>[message]</b></font>")
+			playsound(src.loc, 'sound/voice/binsult.ogg', 100, FALSE, 4)
+			cooldown = world.time
+			return
+
+		usr.visible_message("[usr]'s Compli-o-Nator: <font color='red' size='4'><b>[message]</b></font>")
+		playsound(src.loc, "sound/voice/complionator/[key].ogg", 100, FALSE, 4)
+		cooldown = world.time
+
+
+
+// ********************************************************************
+
+/obj/item/clothing/mask/gas/ghostface
+	name = "Ghostface mask"
+	desc = "Вытянутая белая маска, рот которой открыт в немом крике. Но вот в чём вопрос - ужаса, или ярости?"
+	ru_names = list(
+		NOMINATIVE = "кричащая маска",
+		GENITIVE = "кричащей маски",
+		DATIVE = "кричащей маске",
+		ACCUSATIVE = "кричащую маску",
+		INSTRUMENTAL = "кричащей маской",
+		PREPOSITIONAL = "кричащей маске"
+	)
+	icon_state = "ghostface_mask"
+	item_state = "ghostface_mask"
+	flags_inv = HIDEGLASSES
+	flags_cover = HIDENAME|MASKCOVERSMOUTH|MASKCOVERSEYES
+	species_restricted = list(SPECIES_HUMAN, SPECIES_MACNINEPERSON, SPECIES_SKRELL, SPECIES_SLIMEPERSON, SPECIES_DIONA, SPECIES_NUCLEATION)
+
+/obj/item/clothing/mask/gas/ghostface/equipped(mob/user, slot, initial)
+	if(ishuman(user))
+		if(slot == ITEM_SLOT_MASK)
+			var/mob/living/carbon/human/H = user
+			H.name_override = "Ghostface"
+	. = ..()
+
+/obj/item/clothing/mask/gas/ghostface/dropped(mob/user, slot, silent = FALSE)
+	if(ishuman(user))
+		if(slot == ITEM_SLOT_MASK)
+			var/mob/living/carbon/human/H = user
+			if(H.name_override == "Ghostface")
+				H.name_override = FALSE
+	. = ..()
+
+/obj/item/clothing/mask/gas/ghostface/true
+	armor = list(melee = 30, bullet = 10, laser = 5, energy = 5, bomb = 0, bio = 0, rad = 0, fire = 10, acid = 10)
+	var/obj/item/voice_changer/ghostface/voice_changer
+
+/obj/item/clothing/mask/gas/ghostface/true/devil
+	icon_state = "devil_ghostface_mask"
+
+/obj/item/clothing/mask/gas/ghostface/true/Initialize(mapload)
+	. = ..()
+	voice_changer = new(src)
+
+/obj/item/clothing/mask/gas/ghostface/true/Destroy()
+	QDEL_NULL(voice_changer)
+	return ..()
+
+/obj/item/clothing/mask/gas/ghostface/devil
+	icon_state = "devil_ghostface_mask"
+
+/obj/item/clothing/mask/gas/mining_medic
+	name = "mining respirator"
+	desc = "Небольшой респиратор без защитного стекла и с несъёмными фильтрами, который можно подключить к системе подачи воздуха. Защищает лёгкие от попадания пепла."
+	ru_names = list(
+		NOMINATIVE = "шахтёрский респиратор",
+		GENITIVE = "шахтёрского респиратора",
+		DATIVE = "шахтёрскому респиратору",
+		ACCUSATIVE = "шахтёрский респиратор",
+		INSTRUMENTAL = "шахтёрским респиратоом",
+		PREPOSITIONAL = "шахтёрском распираторе"
+	)
+	flags_inv = HIDENAME
 	flags_cover = MASKCOVERSMOUTH
-	resistance_flags = FLAMMABLE
-	has_fov = FALSE
-	fishing_modifier = 0
-
-/obj/item/clothing/mask/gas/driscoll
-	name = "driscoll mask"
-	desc = "Great for train hijackings. Works like a normal full face gas mask, but won't conceal your identity."
-	icon_state = "driscoll_mask"
-	flags_inv = HIDEFACIALHAIR
-	w_class = WEIGHT_CLASS_NORMAL
-	inhand_icon_state = null
-	fishing_modifier = 0
+	icon_state = "mining_gas"
+	item_state = "mining_gas"

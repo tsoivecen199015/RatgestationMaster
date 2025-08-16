@@ -1,209 +1,208 @@
 //Regular syndicate space suit
 /obj/item/clothing/head/helmet/space/syndicate
 	name = "red space helmet"
+	desc = "Top secret Spess Helmet."
 	icon_state = "syndicate"
-	inhand_icon_state = "space_syndicate"
-	desc = "Has a tag on it: Totally not property of an enemy corporation, honest!"
-	armor_type = /datum/armor/space_syndicate
+	item_state = "syndicate"
+	desc = "Has a tag on it: Totally not property of a hostile corporation, honest!"
+	armor = list(MELEE = 40, BULLET = 50, LASER = 30,ENERGY = 25, BOMB = 30, BIO = 30, RAD = 30, FIRE = 80, ACID = 85)
+	sprite_sheets = list(
+		SPECIES_GREY = 'icons/mob/clothing/species/grey/head.dmi',
+		SPECIES_TAJARAN = 'icons/mob/clothing/species/tajaran/head.dmi',
+		SPECIES_UNATHI = 'icons/mob/clothing/species/unathi/head.dmi',
+		SPECIES_ASHWALKER_BASIC = 'icons/mob/clothing/species/unathi/head.dmi',
+		SPECIES_ASHWALKER_SHAMAN = 'icons/mob/clothing/species/unathi/head.dmi',
+		SPECIES_DRACONOID = 'icons/mob/clothing/species/unathi/head.dmi',
+		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/head.dmi',
+		SPECIES_VOX = 'icons/mob/clothing/species/vox/head.dmi')
 
-/datum/armor/space_syndicate
-	melee = 40
-	bullet = 50
-	laser = 30
-	energy = 40
-	bomb = 30
-	bio = 30
-	fire = 80
-	acid = 85
-
-// Don't blame me, blame whoever added this many variations
-GLOBAL_LIST_INIT(syndicate_space_suits_to_helmets,list(
-	/obj/item/clothing/suit/space/syndicate = /obj/item/clothing/head/helmet/space/syndicate,
-	/obj/item/clothing/suit/space/syndicate/green = /obj/item/clothing/head/helmet/space/syndicate/green,
-	/obj/item/clothing/suit/space/syndicate/green/dark = /obj/item/clothing/head/helmet/space/syndicate/green/dark,
-	/obj/item/clothing/suit/space/syndicate/orange = /obj/item/clothing/head/helmet/space/syndicate/orange,
-	/obj/item/clothing/suit/space/syndicate/blue = /obj/item/clothing/head/helmet/space/syndicate/blue,
-	/obj/item/clothing/suit/space/syndicate/black = /obj/item/clothing/head/helmet/space/syndicate/black,
-	/obj/item/clothing/suit/space/syndicate/black/green = /obj/item/clothing/head/helmet/space/syndicate/black/green,
-	/obj/item/clothing/suit/space/syndicate/black/blue = /obj/item/clothing/head/helmet/space/syndicate/black/blue,
-	/obj/item/clothing/suit/space/syndicate/black/orange = /obj/item/clothing/head/helmet/space/syndicate/black/orange,
-	/obj/item/clothing/suit/space/syndicate/black/red = /obj/item/clothing/head/helmet/space/syndicate/black/red,
-	/obj/item/clothing/suit/space/syndicate/black/white = /obj/item/clothing/head/helmet/space/syndicate/black,
-	/obj/item/clothing/suit/space/syndicate/black/med = /obj/item/clothing/head/helmet/space/syndicate/black/med,
-	/obj/item/clothing/suit/space/syndicate/black/engie = /obj/item/clothing/head/helmet/space/syndicate/black/engie,
-))
 
 /obj/item/clothing/suit/space/syndicate
 	name = "red space suit"
 	icon_state = "syndicate"
-	inhand_icon_state = "space_suit_syndicate"
-	desc = "Has a tag on it: Totally not property of an enemy corporation, honest!"
+	item_state = "space_suit_syndicate"
+	desc = "Has a tag on it: Totally not property of a hostile corporation, honest!"
 	w_class = WEIGHT_CLASS_NORMAL
-	allowed = list(/obj/item/gun, /obj/item/melee/baton, /obj/item/melee/energy/sword/saber, /obj/item/restraints/handcuffs, /obj/item/tank/internals)
-	armor_type = /datum/armor/space_syndicate
-	cell = /obj/item/stock_parts/power_store/cell/hyper
-	var/helmet_type = /obj/item/clothing/head/helmet/space/syndicate
+	allowed = list(/obj/item/gun, /obj/item/ammo_box,/obj/item/ammo_casing, /obj/item/melee/baton, /obj/item/melee/energy/sword/saber, /obj/item/restraints/handcuffs, /obj/item/tank/internals)
+	armor = list(MELEE = 40, BULLET = 50, LASER = 30,ENERGY = 25, BOMB = 30, BIO = 30, RAD = 30, FIRE = 80, ACID = 85)
+	sprite_sheets = list(
+		SPECIES_TAJARAN = 'icons/mob/clothing/species/tajaran/suit.dmi',
+		SPECIES_UNATHI = 'icons/mob/clothing/species/unathi/suit.dmi',
+		SPECIES_ASHWALKER_BASIC = 'icons/mob/clothing/species/unathi/suit.dmi',
+		SPECIES_ASHWALKER_SHAMAN = 'icons/mob/clothing/species/unathi/suit.dmi',
+		SPECIES_DRACONOID = 'icons/mob/clothing/species/unathi/suit.dmi',
+		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/suit.dmi',
+		SPECIES_VOX = 'icons/mob/clothing/species/vox/suit.dmi')
 
 //Green syndicate space suit
 /obj/item/clothing/head/helmet/space/syndicate/green
-	name = "green space helmet"
+	name = "Green Space Helmet"
 	icon_state = "syndicate-helm-green"
-	inhand_icon_state = "space_helmet_syndicate"
+	item_state = "syndicate-helm-green"
 
 /obj/item/clothing/suit/space/syndicate/green
-	name = "green space suit"
+	name = "Green Space Suit"
 	icon_state = "syndicate-green"
-	inhand_icon_state = "syndicate-green"
-	helmet_type = /obj/item/clothing/head/helmet/space/syndicate/green
+	item_state = "syndicate-green"
 
 
 //Dark green syndicate space suit
 /obj/item/clothing/head/helmet/space/syndicate/green/dark
-	name = "dark green space helmet"
+	name = "Dark Green Space Helmet"
 	icon_state = "syndicate-helm-green-dark"
-	inhand_icon_state = "syndicate-helm-green-dark"
+	item_state = "syndicate-helm-green-dark"
 
 /obj/item/clothing/suit/space/syndicate/green/dark
-	name = "dark green space suit"
+	name = "Dark Green Space Suit"
 	icon_state = "syndicate-green-dark"
-	inhand_icon_state = "syndicate-green-dark"
-	helmet_type = /obj/item/clothing/head/helmet/space/syndicate/green/dark
+	item_state = "syndicate-green-dark"
 
 
 //Orange syndicate space suit
 /obj/item/clothing/head/helmet/space/syndicate/orange
-	name = "orange space helmet"
+	name = "Orange Space Helmet"
 	icon_state = "syndicate-helm-orange"
-	inhand_icon_state = "syndicate-helm-orange"
+	item_state = "syndicate-helm-orange"
 
 /obj/item/clothing/suit/space/syndicate/orange
-	name = "orange space suit"
+	name = "Orange Space Suit"
 	icon_state = "syndicate-orange"
-	inhand_icon_state = "syndicate-orange"
-	helmet_type = /obj/item/clothing/head/helmet/space/syndicate/orange
+	item_state = "syndicate-orange"
+
 
 //Blue syndicate space suit
 /obj/item/clothing/head/helmet/space/syndicate/blue
-	name = "blue space helmet"
+	name = "Blue Space Helmet"
 	icon_state = "syndicate-helm-blue"
-	inhand_icon_state = "syndicate-helm-blue"
+	item_state = "syndicate-helm-blue"
 
 /obj/item/clothing/suit/space/syndicate/blue
-	name = "blue space suit"
+	name = "Blue Space Suit"
 	icon_state = "syndicate-blue"
-	inhand_icon_state = "syndicate-blue"
-	helmet_type = /obj/item/clothing/head/helmet/space/syndicate/blue
+	item_state = "syndicate-blue"
 
 
 //Black syndicate space suit
 /obj/item/clothing/head/helmet/space/syndicate/black
-	name = "black space helmet"
+	name = "Black Space Helmet"
 	icon_state = "syndicate-helm-black"
-	inhand_icon_state = "syndicate-helm-black"
+	item_state = "syndicate-helm-black"
+
+/obj/item/clothing/head/helmet/space/syndicate/black/strike
+	name = "Syndicate Strike Team commando helmet"
+	desc = "A heavily armored black helmet that is only given to high-ranking Syndicate operatives."
+	armor = list(melee = 80, bullet = 80, laser = 50, energy = 50, bomb = 100, bio = 100, rad = 100, fire = 100, acid = 100) //Matches DS gear.
+	max_heat_protection_temperature = FIRE_IMMUNITY_MAX_TEMP_PROTECT
+	resistance_flags = ACID_PROOF
 
 /obj/item/clothing/suit/space/syndicate/black
-	name = "black space suit"
+	name = "Black Space Suit"
 	icon_state = "syndicate-black"
-	inhand_icon_state = "syndicate-black"
-	helmet_type = /obj/item/clothing/head/helmet/space/syndicate/black
+	item_state = "syndicate-black"
 
+/obj/item/clothing/suit/space/syndicate/black/strike
+	name = "Syndicate Strike Team commando space suit"
+	desc = "A heavily armored, black space suit that is only given to high-ranking Syndicate operatives."
+	armor = list(melee = 80, bullet = 80, laser = 50, energy = 50, bomb = 100, bio = 100, rad = 100, fire = 100, acid = 100) //Matches DS gear.
+	max_heat_protection_temperature = FIRE_IMMUNITY_MAX_TEMP_PROTECT
+	resistance_flags = ACID_PROOF
 
 //Black-green syndicate space suit
 /obj/item/clothing/head/helmet/space/syndicate/black/green
-	name = "black space helmet"
+	name = "Black Space Helmet"
 	icon_state = "syndicate-helm-black-green"
-	inhand_icon_state = "syndicate-helm-black-green"
+	item_state = "syndicate-helm-black-green"
 
 /obj/item/clothing/suit/space/syndicate/black/green
-	name = "black and green space suit"
+	name = "Black and Green Space Suit"
 	icon_state = "syndicate-black-green"
-	inhand_icon_state = "syndicate-black-green"
-	helmet_type = /obj/item/clothing/head/helmet/space/syndicate/black/green
+	item_state = "syndicate-black-green"
 
 
 //Black-blue syndicate space suit
 /obj/item/clothing/head/helmet/space/syndicate/black/blue
-	name = "black space helmet"
+	name = "Black Space Helmet"
 	icon_state = "syndicate-helm-black-blue"
-	inhand_icon_state = "syndicate-helm-black-blue"
+	item_state = "syndicate-helm-black-blue"
 
 /obj/item/clothing/suit/space/syndicate/black/blue
-	name = "black and blue space suit"
+	name = "Black and Blue Space Suit"
 	icon_state = "syndicate-black-blue"
-	inhand_icon_state = "syndicate-black-blue"
-	helmet_type = /obj/item/clothing/head/helmet/space/syndicate/black/blue
-
-//Black and white syndicate space suit without the medical iconography
-/obj/item/clothing/suit/space/syndicate/black/white
-	name = "black and white space suit"
-	icon_state = "syndicate-black-white"
-	inhand_icon_state = "syndicate-black"
-	helmet_type = /obj/item/clothing/head/helmet/space/syndicate/black
+	item_state = "syndicate-black-blue"
 
 
 //Black medical syndicate space suit
 /obj/item/clothing/head/helmet/space/syndicate/black/med
-	name = "black space helmet"
+	name = "Black Space Helmet"
 	icon_state = "syndicate-helm-black-med"
-	inhand_icon_state = "syndicate-helm-black"
+	item_state = "syndicate-helm-black"
 
 /obj/item/clothing/suit/space/syndicate/black/med
-	name = "green space suit"
+	name = "Green Space Suit"
 	icon_state = "syndicate-black-med"
-	inhand_icon_state = "syndicate-black"
-	helmet_type = /obj/item/clothing/head/helmet/space/syndicate/black/med
+	item_state = "syndicate-black"
 
 
 //Black-orange syndicate space suit
 /obj/item/clothing/head/helmet/space/syndicate/black/orange
-	name = "black space helmet"
+	name = "Black Space Helmet"
 	icon_state = "syndicate-helm-black-orange"
-	inhand_icon_state = "syndicate-helm-black"
+	item_state = "syndicate-helm-black"
 
 /obj/item/clothing/suit/space/syndicate/black/orange
-	name = "black and orange space suit"
+	name = "Black and Orange Space Suit"
 	icon_state = "syndicate-black-orange"
-	inhand_icon_state = "syndicate-black"
-	helmet_type = /obj/item/clothing/head/helmet/space/syndicate/black/orange
+	item_state = "syndicate-black"
 
 
 //Black-red syndicate space suit
 /obj/item/clothing/head/helmet/space/syndicate/black/red
-	name = "black space helmet"
+	name = "Black Space Helmet"
 	icon_state = "syndicate-helm-black-red"
-	inhand_icon_state = "syndicate-helm-black-red"
+	item_state = "syndicate-helm-black-red"
+
+/obj/item/clothing/head/helmet/space/syndicate/black/red/strike
+	name = "Syndicate Strike Team leader helmet"
+	desc = "A heavily armored, black and red space helmet that is only given to elite Syndicate operatives, it looks particularly menacing."
+	armor = list(melee = 80, bullet = 80, laser = 50, energy = 50, bomb = 100, bio = 100, rad = 100, fire = 100, acid = 100) //Matches DS gear.
+	max_heat_protection_temperature = FIRE_IMMUNITY_MAX_TEMP_PROTECT
+	resistance_flags = ACID_PROOF
 
 /obj/item/clothing/suit/space/syndicate/black/red
-	name = "black and red space suit"
+	name = "Black and Red Space Suit"
 	icon_state = "syndicate-black-red"
-	inhand_icon_state = "syndicate-black-red"
-	helmet_type = /obj/item/clothing/head/helmet/space/syndicate/black/red
+	item_state = "syndicate-black-red"
 
-//Black-red syndicate contract varient
-/obj/item/clothing/head/helmet/space/syndicate/contract
-	name = "contractor helmet"
-	desc = "A specialised black and gold helmet that's more compact than its standard Syndicate counterpart. Can be ultra-compressed into even the tightest of spaces."
-	w_class = WEIGHT_CLASS_SMALL
-	icon_state = "syndicate-contract-helm"
-	inhand_icon_state = "contractor_helmet"
+/obj/item/clothing/suit/space/syndicate/black/red/strike
+	name = "Syndicate Strike Team leader space suit"
+	desc = "A heavily armored, black and red space suit that is only given to elite Syndicate operatives, it looks particularly menacing."
+	armor = list(melee = 80, bullet = 80, laser = 50, energy = 50, bomb = 100, bio = 100, rad = 100, fire = 100, acid = 100) //Matches DS gear.
+	max_heat_protection_temperature = FIRE_IMMUNITY_MAX_TEMP_PROTECT
+	resistance_flags = ACID_PROOF
 
-/obj/item/clothing/suit/space/syndicate/contract
-	name = "contractor space suit"
-	desc = "A specialised black and gold space suit that's quicker, and more compact than its standard Syndicate counterpart. Can be ultra-compressed into even the tightest of spaces."
-	slowdown = 1
-	w_class = WEIGHT_CLASS_SMALL
-	icon_state = "syndicate-contract"
-	inhand_icon_state = null
-	helmet_type = /obj/item/clothing/head/helmet/space/syndicate/contract
 
 //Black with yellow/red engineering syndicate space suit
 /obj/item/clothing/head/helmet/space/syndicate/black/engie
-	name = "black space helmet"
+	name = "Black Space Helmet"
 	icon_state = "syndicate-helm-black-engie"
-	inhand_icon_state = "syndicate-helm-black"
+	item_state = "syndicate-helm-black"
 
 /obj/item/clothing/suit/space/syndicate/black/engie
-	name = "black engineering space suit"
+	name = "Black Engineering Space Suit"
 	icon_state = "syndicate-black-engie"
-	inhand_icon_state = "syndicate-black"
-	helmet_type = /obj/item/clothing/head/helmet/space/syndicate/black/engie
+	item_state = "syndicate-black"
+
+/obj/item/clothing/head/helmet/space/syndicate/contractor
+	name = "contractor helmet"
+	desc = "A specialised black and gold helmet that's more compact than its standard Syndicate counterpart. Can be ultra-compressed into even the tightest of spaces."
+	w_class = WEIGHT_CLASS_SMALL
+	icon_state = "syndicate-helm-contractor"
+	item_state = "syndicate-helm-contractor"
+
+/obj/item/clothing/suit/space/syndicate/contractor
+	name = "contractor space suit"
+	desc = "A specialised black and gold space suit that's quicker, and more compact than its standard Syndicate counterpart. Can be ultra-compressed into even the tightest of spaces."
+	slowdown = 0
+	w_class = WEIGHT_CLASS_SMALL
+	icon_state = "syndicate-contractor"
+	item_state = "syndicate-contractor"

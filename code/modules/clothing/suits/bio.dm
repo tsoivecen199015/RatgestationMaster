@@ -1,61 +1,73 @@
 //Biosuit complete with shoes (in the item sprite)
 /obj/item/clothing/head/bio_hood
 	name = "bio hood"
-	desc = "A hood that protects the head and face from biological contaminants."
-	icon = 'icons/obj/clothing/head/bio.dmi'
-	worn_icon = 'icons/mob/clothing/head/bio.dmi'
 	icon_state = "bio"
-	inhand_icon_state = "bio_hood"
-	clothing_flags = THICKMATERIAL | BLOCK_GAS_SMOKE_EFFECT | SNUG_FIT | STACKABLE_HELMET_EXEMPT | HEADINTERNALS
-	armor_type = /datum/armor/head_bio_hood
-	flags_inv = HIDEMASK|HIDEEARS|HIDEEYES|HIDEHAIR|HIDEFACIALHAIR|HIDEFACE|HIDESNOUT
+	desc = "A hood that protects the head and face from biological comtaminants."
+	permeability_coefficient = 0.01
+	clothing_flags = THICKMATERIAL
+	flags_inv = HIDEHAIR|HIDEMASK|HIDEHEADSETS|HIDEGLASSES
+	flags_cover = HEADCOVERSEYES|HEADCOVERSMOUTH
+	armor = list(MELEE = 0, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 100, RAD = 80, FIRE = 30, ACID = 100)
 	resistance_flags = ACID_PROOF
-	flags_cover = HEADCOVERSEYES | HEADCOVERSMOUTH | PEPPERPROOF
 
-/obj/item/clothing/head/bio_hood/Initialize(mapload)
-	. = ..()
-	if(flags_inv & HIDEFACE)
-		AddComponent(/datum/component/clothing_fov_visor, FOV_90_DEGREES)
-	AddComponent(/datum/component/adjust_fishing_difficulty, 6)
-
-/datum/armor/head_bio_hood
-	bio = 100
-	fire = 30
-	acid = 100
+	sprite_sheets = list(
+		SPECIES_PLASMAMAN = 'icons/mob/clothing/species/plasmaman/suit.dmi',
+		SPECIES_VOX = 'icons/mob/clothing/species/vox/head.dmi',
+		SPECIES_UNATHI = 'icons/mob/clothing/species/unathi/head.dmi',
+		SPECIES_ASHWALKER_BASIC = 'icons/mob/clothing/species/unathi/head.dmi',
+		SPECIES_ASHWALKER_SHAMAN = 'icons/mob/clothing/species/unathi/head.dmi',
+		SPECIES_DRACONOID = 'icons/mob/clothing/species/unathi/head.dmi',
+		SPECIES_TAJARAN = 'icons/mob/clothing/species/tajaran/head.dmi',
+		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/head.dmi',
+		SPECIES_GREY = 'icons/mob/clothing/species/grey/head.dmi',
+		SPECIES_MONKEY = 'icons/mob/clothing/species/monkey/head.dmi',
+		SPECIES_FARWA = 'icons/mob/clothing/species/monkey/head.dmi',
+		SPECIES_WOLPIN = 'icons/mob/clothing/species/monkey/head.dmi',
+		SPECIES_NEARA = 'icons/mob/clothing/species/monkey/head.dmi',
+		SPECIES_STOK = 'icons/mob/clothing/species/monkey/head.dmi'
+	)
 
 /obj/item/clothing/suit/bio_suit
 	name = "bio suit"
 	desc = "A suit that protects against biological contamination."
-	icon = 'icons/obj/clothing/suits/bio.dmi'
 	icon_state = "bio"
-	worn_icon = 'icons/mob/clothing/suits/bio.dmi'
-	inhand_icon_state = "bio_suit"
+	item_state = "bio_suit"
 	w_class = WEIGHT_CLASS_BULKY
+	gas_transfer_coefficient = 0.01
+	permeability_coefficient = 0.01
 	clothing_flags = THICKMATERIAL
-	body_parts_covered = CHEST|GROIN|LEGS|FEET|ARMS|HANDS
-	slowdown = 0.5
-	allowed = list(/obj/item/tank/internals, /obj/item/reagent_containers/dropper, /obj/item/flashlight/pen, /obj/item/reagent_containers/syringe, /obj/item/reagent_containers/hypospray, /obj/item/reagent_containers/cup/beaker, /obj/item/gun/syringe)
-	armor_type = /datum/armor/suit_bio_suit
-	flags_inv = HIDEGLOVES|HIDEJUMPSUIT|HIDEBELT
+	body_parts_covered = UPPER_TORSO|LOWER_TORSO|LEGS|FEET|ARMS|HANDS
+	slowdown = 1
+	allowed = list(/obj/item/tank/internals/emergency_oxygen,/obj/item/pen,/obj/item/flashlight/pen)
+	armor = list(MELEE = 0, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 100, RAD = 80, FIRE = 30, ACID = 100)
+	flags_inv = HIDEGLOVES|HIDESHOES|HIDEJUMPSUIT|HIDETAIL
 	strip_delay = 70
-	equip_delay_other = 70
+	put_on_delay = 70
 	resistance_flags = ACID_PROOF
+	sprite_sheets = list(
+		SPECIES_PLASMAMAN = 'icons/mob/clothing/species/plasmaman/suit.dmi',
+		SPECIES_TAJARAN = 'icons/mob/clothing/species/tajaran/suit.dmi',
+		SPECIES_UNATHI = 'icons/mob/clothing/species/unathi/suit.dmi',
+		SPECIES_ASHWALKER_BASIC = 'icons/mob/clothing/species/unathi/suit.dmi',
+		SPECIES_ASHWALKER_SHAMAN = 'icons/mob/clothing/species/unathi/suit.dmi',
+		SPECIES_DRACONOID = 'icons/mob/clothing/species/unathi/suit.dmi',
+		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/suit.dmi',
+		SPECIES_VOX = 'icons/mob/clothing/species/vox/suit.dmi',
+		SPECIES_MONKEY = 'icons/mob/clothing/species/monkey/suit.dmi',
+		SPECIES_FARWA = 'icons/mob/clothing/species/monkey/suit.dmi',
+		SPECIES_WOLPIN = 'icons/mob/clothing/species/monkey/suit.dmi',
+		SPECIES_NEARA = 'icons/mob/clothing/species/monkey/suit.dmi',
+		SPECIES_STOK = 'icons/mob/clothing/species/monkey/suit.dmi'
+		)
 
-/obj/item/clothing/suit/bio_suit/Initialize(mapload)
-	. = ..()
-	AddComponent(/datum/component/adjust_fishing_difficulty, 6)
 
 //Standard biosuit, orange stripe
-/datum/armor/suit_bio_suit
-	bio = 100
-	fire = 30
-	acid = 100
-
 /obj/item/clothing/head/bio_hood/general
-	icon_state = "bio"
+	icon_state = "bio_general"
 
 /obj/item/clothing/suit/bio_suit/general
-	icon_state = "bio"
+	icon_state = "bio_general"
+
 
 //Virology biosuit, green stripe
 /obj/item/clothing/head/bio_hood/virology
@@ -64,38 +76,16 @@
 /obj/item/clothing/suit/bio_suit/virology
 	icon_state = "bio_virology"
 
+
 //Security biosuit, grey with red stripe across the chest
 /obj/item/clothing/head/bio_hood/security
-	armor_type = /datum/armor/bio_hood_security
+	armor = list(MELEE = 25, BULLET = 15, LASER = 25, ENERGY = 10, BOMB = 25, BIO = 100, RAD = 80, FIRE = 30, ACID = 100)
 	icon_state = "bio_security"
-
-/datum/armor/bio_hood_security
-	melee = 25
-	bullet = 15
-	laser = 25
-	energy = 35
-	bomb = 25
-	bio = 100
-	fire = 30
-	acid = 100
 
 /obj/item/clothing/suit/bio_suit/security
-	armor_type = /datum/armor/bio_suit_security
+	armor = list(MELEE = 25, BULLET = 15, LASER = 25, ENERGY = 10, BOMB = 25, BIO = 100, RAD = 80, FIRE = 30, ACID = 100)
 	icon_state = "bio_security"
 
-/datum/armor/bio_suit_security
-	melee = 25
-	bullet = 15
-	laser = 25
-	energy = 35
-	bomb = 25
-	bio = 100
-	fire = 30
-	acid = 100
-
-/obj/item/clothing/suit/bio_suit/security/Initialize(mapload)
-	. = ..()
-	allowed += GLOB.security_vest_allowed
 
 //Janitor's biosuit, grey with purple arms
 /obj/item/clothing/head/bio_hood/janitor
@@ -104,9 +94,6 @@
 /obj/item/clothing/suit/bio_suit/janitor
 	icon_state = "bio_janitor"
 
-/obj/item/clothing/suit/bio_suit/janitor/Initialize(mapload)
-	. = ..()
-	allowed += list(/obj/item/storage/bag/trash, /obj/item/reagent_containers/spray)
 
 //Scientist's biosuit, white with a pink-ish hue
 /obj/item/clothing/head/bio_hood/scientist
@@ -115,26 +102,36 @@
 /obj/item/clothing/suit/bio_suit/scientist
 	icon_state = "bio_scientist"
 
-//CMO's biosuit, blue stripe
-/obj/item/clothing/head/bio_hood/cmo
-	icon_state = "bio_cmo"
 
+//CMO's biosuit, blue stripe
 /obj/item/clothing/suit/bio_suit/cmo
 	icon_state = "bio_cmo"
 
-/obj/item/clothing/suit/bio_suit/cmo/Initialize(mapload)
-	. = ..()
-	allowed += list(/obj/item/melee/baton/telescopic)
+/obj/item/clothing/head/bio_hood/cmo
+	icon_state = "bio_cmo"
+
 
 //Plague Dr mask can be found in clothing/masks/gasmask.dm
 /obj/item/clothing/suit/bio_suit/plaguedoctorsuit
-	name = "plague doctor suit"
+	name = "Plague doctor suit"
 	desc = "It protected doctors from the Black Death, back then. You bet your arse it's gonna help you against viruses."
 	icon_state = "plaguedoctor"
-	inhand_icon_state = "bio_suit"
+	item_state = "bio_suit"
 	strip_delay = 40
-	equip_delay_other = 20
+	put_on_delay = 20
 
-/obj/item/clothing/suit/bio_suit/plaguedoctorsuit/Initialize(mapload)
-	. = ..()
-	allowed += list(/obj/item/book/bible, /obj/item/nullrod, /obj/item/cane)
+	sprite_sheets = list(
+		SPECIES_PLASMAMAN = 'icons/mob/clothing/species/plasmaman/suit.dmi',
+		SPECIES_TAJARAN = 'icons/mob/clothing/species/tajaran/suit.dmi',
+		SPECIES_UNATHI = 'icons/mob/clothing/species/unathi/suit.dmi',
+		SPECIES_ASHWALKER_BASIC = 'icons/mob/clothing/species/unathi/suit.dmi',
+		SPECIES_ASHWALKER_SHAMAN = 'icons/mob/clothing/species/unathi/suit.dmi',
+		SPECIES_DRACONOID = 'icons/mob/clothing/species/unathi/suit.dmi',
+		SPECIES_VULPKANIN = 'icons/mob/clothing/species/vulpkanin/suit.dmi',
+		SPECIES_MONKEY = 'icons/mob/clothing/species/monkey/suit.dmi',
+		SPECIES_FARWA = 'icons/mob/clothing/species/monkey/suit.dmi',
+		SPECIES_WOLPIN = 'icons/mob/clothing/species/monkey/suit.dmi',
+		SPECIES_NEARA = 'icons/mob/clothing/species/monkey/suit.dmi',
+		SPECIES_STOK = 'icons/mob/clothing/species/monkey/suit.dmi'
+		)
+	hide_tail_by_species = list(SPECIES_TAJARAN, SPECIES_UNATHI, SPECIES_ASHWALKER_BASIC, SPECIES_ASHWALKER_SHAMAN, SPECIES_DRACONOID, SPECIES_VULPKANIN)
